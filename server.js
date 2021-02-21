@@ -30,17 +30,17 @@ const io = SocketIO(httpServer);
 io.on("connection", (socket) => {
   console.log("connected:", socket.id);
 
-  socket.on("join", (pathname) => {
+  socket.on("join", (pathname, sessionId) => {
     // Add player to room map
     const room = rooms.get(pathname) || { status: "loby", players: [] };
-    room.players = room.players.concat({ id: socket.id });
+    room.players = room.players.concat({ sessionId, socketId: socket.id });
     rooms.set(pathname, room);
 
     // Connect to socket room
     socket.join(pathname);
 
     // Broadcast that player has joined
-    io.to(pathname).emit("joined", socket.id, room);
+    io.to(pathname).emit("joined", sessionId, room);
   });
 
   socket.on("disconnecting", () => {
@@ -52,12 +52,15 @@ io.on("connection", (socket) => {
       const room = rooms.get(pathname);
       if (room == null) continue;
 
+      // Find the session id
+      const sessionId = room.players.find((p) => p.socketId === socket.id);
+
       // Remove player from room
-      room.players = room.players.filter((p) => p.id !== socket.id);
+      room.players = room.players.filter((p) => p.socketId !== socket.id);
       rooms.set(pathname, room);
 
       // Broadcast to other players
-      socket.broadcast.to(pathname).emit("left", socket.id, room);
+      socket.broadcast.to(pathname).emit("left", sessionId, room);
     }
   });
 });

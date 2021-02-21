@@ -1,6 +1,7 @@
 const io = require("socket.io-client");
 const React = require("react");
 const ReactDom = require("react-dom");
+const uuid = require("uuid");
 
 window.addEventListener("load", () => {
   ReactDom.render(
@@ -15,11 +16,12 @@ function App() {
   React.useEffect(() => {
     // Todo: Redirect if pathname is less than 4 characters
 
+    const sessionId = getSessionId();
     const socket = io();
 
     socket.on("connect", () => {
       console.log("Connected:", socket.id);
-      socket.emit("join", location.pathname);
+      socket.emit("join", location.pathname, sessionId);
     });
 
     socket.on("disconnect", () => {
@@ -27,13 +29,13 @@ function App() {
       setRoom({ status: "connecting" });
     });
 
-    socket.on("joined", (newPlayerId, room) => {
-      console.log("New player: ", newPlayerId);
+    socket.on("joined", (sessionId, room) => {
+      console.log("New player: ", sessionId);
       setRoom(room);
     });
 
-    socket.on("left", (oldPlayerId, room) => {
-      console.log("Player left: ", oldPlayerId);
+    socket.on("left", (sessionId, room) => {
+      console.log("Player left: ", sessionId);
       setRoom(room);
     });
   }, []);
@@ -50,7 +52,7 @@ function App() {
     return div('loby', {},
       div('players', {},
         room.players.map(player =>
-          div('player', { key: player.id }, player.id))))
+          div('player', { key: player.sessionId }, player.sessionId))))
   }
 }
 
@@ -67,4 +69,18 @@ function a(className, href, props, ...children) {
 
 function img(className, src, props, ...children) {
   return React.createElement("img", { className, src, ...props }, ...children);
+}
+
+//
+// Domain helpers
+
+function getSessionId() {
+  let sessionId = sessionStorage.getItem("sessionId");
+
+  if (sessionId == null) {
+    sessionId = uuid.v4();
+    sessionStorage.setItem("sessionId", sessionId);
+  }
+
+  return sessionId;
 }
