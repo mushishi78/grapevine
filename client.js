@@ -14,14 +14,13 @@ function App() {
   const [room, setRoom] = React.useState({ status: "connecting" });
 
   React.useEffect(() => {
-    // Todo: Redirect if pathname is less than 4 characters
-
     const sessionId = getSessionId();
+    const roomCode = getRoomCode();
     const socket = io();
 
     socket.on("connect", () => {
       console.log("Connected:", socket.id);
-      socket.emit("join", location.pathname, sessionId);
+      socket.emit("join", roomCode, sessionId);
     });
 
     socket.on("disconnect", () => {
@@ -74,11 +73,27 @@ function img(className, src, props, ...children) {
 //
 // Domain helpers
 
+function getRoomCode() {
+  if (location.pathname.length > 5) return location.pathname.slice(1);
+  const roomCode = makeRoomCode(6);
+  history.pushState({}, null, `/${roomCode}`);
+  return roomCode;
+}
+
+function makeRoomCode(length) {
+  var result = "";
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  for (var i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+}
+
 function getSessionId() {
   let sessionId = sessionStorage.getItem("sessionId");
 
   if (sessionId == null) {
-    sessionId = uuid.v4();
+    sessionId = uuid.v1();
     sessionStorage.setItem("sessionId", sessionId);
   }
 

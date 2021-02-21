@@ -30,26 +30,30 @@ const io = SocketIO(httpServer);
 io.on("connection", (socket) => {
   console.log("connected:", socket.id);
 
-  socket.on("join", (pathname, sessionId) => {
+  socket.on("join", (roomCode, sessionId) => {
     // Add player to room map
-    const room = rooms.get(pathname) || { status: "loby", players: [] };
+    const room = rooms.get(roomCode) || {
+      roomCode,
+      status: "loby",
+      players: [],
+    };
     room.players = room.players.concat({ sessionId, socketId: socket.id });
-    rooms.set(pathname, room);
+    rooms.set(roomCode, room);
 
     // Connect to socket room
-    socket.join(pathname);
+    socket.join(roomCode);
 
     // Broadcast that player has joined
-    io.to(pathname).emit("joined", sessionId, room);
+    io.to(roomCode).emit("joined", sessionId, room);
   });
 
   socket.on("disconnecting", () => {
-    for (const pathname of socket.rooms) {
+    for (const roomCode of socket.rooms) {
       // Ignore private room
-      if (pathname === socket.id) continue;
+      if (roomCode === socket.id) continue;
 
       // Get room that socket was part of
-      const room = rooms.get(pathname);
+      const room = rooms.get(roomCode);
       if (room == null) continue;
 
       // Find the session id
@@ -57,10 +61,10 @@ io.on("connection", (socket) => {
 
       // Remove player from room
       room.players = room.players.filter((p) => p.socketId !== socket.id);
-      rooms.set(pathname, room);
+      rooms.set(roomCode, room);
 
       // Broadcast to other players
-      socket.broadcast.to(pathname).emit("left", sessionId, room);
+      socket.broadcast.to(roomCode).emit("left", sessionId, room);
     }
   });
 });
