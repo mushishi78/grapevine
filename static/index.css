@@ -1,4 +1,27 @@
 html,
 body {
   margin: 0;
+  font-family: "Roboto Mono", monospace;
+}
+
+.full-page {
+  height: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.full-page-box {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border: 2px solid #666;
+  box-shadow: 0 0 5px 0 #9a9a9a;
+}
+
+.full-page-message {
+  color: #333;
+  font-size: 25px;
 }
