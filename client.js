@@ -2,6 +2,7 @@ const io = require("socket.io-client");
 const React = require("react");
 const ReactDom = require("react-dom");
 const uuid = require("uuid");
+const copyToClipboard = require("copy-to-clipboard");
 
 const plusIcon = require("/eva-icons/fill/svg/plus.svg");
 const copyIcon = require("/eva-icons/fill/svg/copy.svg");
@@ -27,6 +28,7 @@ window.addEventListener("load", () => {
 
 function App(props) {
   const [room, setRoom] = React.useState({ status: "connecting" });
+  const [copied, setCopied] = React.useState(false);
 
   React.useEffect(() => {
     const { socket } = props;
@@ -52,6 +54,14 @@ function App(props) {
     });
   }, []);
 
+  async function copy() {
+    if (copied) return;
+    copyToClipboard(location.href);
+    setCopied(true);
+    await timeout(1000);
+    setCopied(false);
+  }
+
   if (room.status === "connecting") {
     // prettier-ignore
     return div('full-page', {},
@@ -72,7 +82,9 @@ function App(props) {
           div('room-label', {}, 'Link'),
           div('room-row', {},
             a('room-link-value', location.href, {}, location.href),
-            div('room-button copy', {}, raw(copyIcon)))),
+            div('room-button copy', { onClick: () => copy() }, raw(copyIcon)),
+            div(`room-link-copied ${copied}`, {},
+              'Copied!'))),
       ),
       div('row', {},
         div('user', {},
@@ -177,4 +189,8 @@ function buildArray(length, fn) {
   return Array(length)
     .fill(null)
     .map((_, index) => fn(index));
+}
+
+function timeout(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

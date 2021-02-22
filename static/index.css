@@ -62,16 +62,29 @@ body {
 
 .room-link-value {
   font-size: 10px;
-  color: blue;
+  color: hsl(240deg 80% 60%);
+  text-decoration: none;
+}
+
+.room-link-copied {
+  color: white;
+  font-size: 10px;
+}
+
+.room-link-copied.true {
+  color: black;
 }
 
 .room-button {
   width: 18px;
   padding: 0px 5px;
   cursor: pointer;
+  fill: #777;
 }
 
-.room-button:hover {fill: #444;}
+.room-button:hover {
+  fill: #444;
+}
 
 .room-button.copy {
 }
