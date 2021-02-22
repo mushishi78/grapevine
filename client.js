@@ -3,24 +3,37 @@ const React = require("react");
 const ReactDom = require("react-dom");
 const uuid = require("uuid");
 
+const plusIcon = require("/eva-icons/fill/svg/plus.svg");
+const copyIcon = require("/eva-icons/fill/svg/copy.svg");
+
 window.addEventListener("load", () => {
+  const roomCode = getRoomCode();
+  const socket = io();
+  const user = {
+    sessionId: getSessionId(),
+    icon: getUserIcon(),
+    color: getUserColor(),
+  };
+
   ReactDom.render(
-    React.createElement(App, {}),
+    React.createElement(App, {
+      roomCode,
+      socket,
+      user,
+    }),
     document.querySelector("#root")
   );
 });
 
-function App() {
+function App(props) {
   const [room, setRoom] = React.useState({ status: "connecting" });
 
   React.useEffect(() => {
-    const sessionId = getSessionId();
-    const roomCode = getRoomCode();
-    const socket = io();
+    const { socket } = props;
 
     socket.on("connect", () => {
       console.log("Connected:", socket.id);
-      socket.emit("join", roomCode, sessionId);
+      socket.emit("join", props.roomCode, props.user);
     });
 
     socket.on("disconnect", () => {
@@ -28,13 +41,13 @@ function App() {
       setRoom({ status: "connecting" });
     });
 
-    socket.on("joined", (sessionId, room) => {
-      console.log("New player: ", sessionId);
+    socket.on("joined", (player, room) => {
+      console.log("New player: ", player);
       setRoom(room);
     });
 
-    socket.on("left", (sessionId, room) => {
-      console.log("Player left: ", sessionId);
+    socket.on("left", (player, room) => {
+      console.log("Player left: ", player);
       setRoom(room);
     });
   }, []);
@@ -49,9 +62,31 @@ function App() {
   if (room.status === "loby") {
     // prettier-ignore
     return div('loby', {},
-      div('players', {},
-        room.players.map(player =>
-          div('player', { key: player.sessionId }, player.sessionId))))
+      div('row', {},
+        div('room-code', {},
+          div('room-label', {}, 'Room'),
+          div('room-row', {},
+            div('room-code-value', {}, room.roomCode),
+            div('room-button new', {}, raw(plusIcon)))),
+        div('room-link', {},
+          div('room-label', {}, 'Link'),
+          div('room-row', {},
+            a('room-link-value', location.href, {}, location.href),
+            div('room-button copy', {}, raw(copyIcon)))),
+      ),
+      div('row', {},
+        div('user', {},
+          div('user-label', {}, 'You'),
+          div(`user-circle ${props.user.color}`, {},
+            div(`user-icon`, {}, props.user.icon))),
+        div('players', {},
+          div('players-label', {}, 'Players'),
+          div('players-row', {},
+            room.players.map(player =>
+              div(`player-circle ${player.color}`, { key: player.socketId },
+                div('player-icon', {}, player.icon)))))
+      )
+    )
   }
 }
 
@@ -70,32 +105,76 @@ function img(className, src, props, ...children) {
   return React.createElement("img", { className, src, ...props }, ...children);
 }
 
+function raw(html) {
+  return React.createElement("div", {
+    dangerouslySetInnerHTML: { __html: html },
+  });
+}
+
 //
 // Domain helpers
 
 function getRoomCode() {
   if (location.pathname.length > 5) return location.pathname.slice(1);
-  const roomCode = makeRoomCode(6);
+  const roomCode = makeRoomCode();
   history.pushState({}, null, `/${roomCode}`);
   return roomCode;
 }
 
-function makeRoomCode(length) {
-  var result = "";
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  for (var i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
+function makeRoomCode() {
+  return buildArray(6, () =>
+    getRandomMember("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+  ).join("");
 }
 
 function getSessionId() {
-  let sessionId = sessionStorage.getItem("sessionId");
+  return readFromSessionWithDefault("sessionId", () => uuid.v1());
+}
 
-  if (sessionId == null) {
-    sessionId = uuid.v1();
-    sessionStorage.setItem("sessionId", sessionId);
+function getUserIcon() {
+  return readFromSessionWithDefault("userIcon", () =>
+    getRandomMember([
+      "🐱",
+      "🐭",
+      "🐹",
+      "🐰",
+      "🦊",
+      "🐻",
+      "🐼",
+      "🐨",
+      "🐯",
+      "🦁",
+      "🐮",
+      "🐷",
+      "🐸",
+      "🐵",
+    ])
+  );
+}
+
+function getUserColor() {
+  return readFromSessionWithDefault("userColor", () =>
+    getRandomMember(["red", "blue", "green", "magenta", "cyan", "yellow"])
+  );
+}
+
+function readFromSessionWithDefault(key, createDefault) {
+  let value = sessionStorage.getItem(key);
+
+  if (value == null) {
+    value = createDefault();
+    sessionStorage.setItem(key, value);
   }
 
-  return sessionId;
+  return value;
+}
+
+function getRandomMember(array) {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
+function buildArray(length, fn) {
+  return Array(length)
+    .fill(null)
+    .map((_, index) => fn(index));
 }

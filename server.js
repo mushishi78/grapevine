@@ -30,21 +30,20 @@ const io = SocketIO(httpServer);
 io.on("connection", (socket) => {
   console.log("connected:", socket.id);
 
-  socket.on("join", (roomCode, sessionId) => {
+  socket.on("join", (roomCode, user) => {
+    const player = { ...user, socketId: socket.id };
+    const emptyRoom = { roomCode, status: "loby", players: [] };
+
     // Add player to room map
-    const room = rooms.get(roomCode) || {
-      roomCode,
-      status: "loby",
-      players: [],
-    };
-    room.players = room.players.concat({ sessionId, socketId: socket.id });
+    const room = rooms.get(roomCode) || emptyRoom;
+    room.players = room.players.concat(player);
     rooms.set(roomCode, room);
 
     // Connect to socket room
     socket.join(roomCode);
 
     // Broadcast that player has joined
-    io.to(roomCode).emit("joined", sessionId, room);
+    io.to(roomCode).emit("joined", player, room);
   });
 
   socket.on("disconnecting", () => {
@@ -57,14 +56,14 @@ io.on("connection", (socket) => {
       if (room == null) continue;
 
       // Find the session id
-      const sessionId = room.players.find((p) => p.socketId === socket.id);
+      const player = room.players.find((p) => p.socketId === socket.id);
 
       // Remove player from room
       room.players = room.players.filter((p) => p.socketId !== socket.id);
       rooms.set(roomCode, room);
 
       // Broadcast to other players
-      socket.broadcast.to(roomCode).emit("left", sessionId, room);
+      socket.broadcast.to(roomCode).emit("left", player, room);
     }
   });
 });

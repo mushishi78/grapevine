@@ -2,6 +2,7 @@ html,
 body {
   margin: 0;
   font-family: "Roboto Mono", monospace;
+  color: #333;
 }
 
 .full-page {
@@ -24,4 +25,126 @@ body {
 .full-page-message {
   color: #333;
   font-size: 25px;
+}
+
+.loby {
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.room-row {
+  display: flex;
+  align-items: center;
+}
+
+.room-code {
+  padding: 5px;
+  flex-grow: 1;
+}
+
+.room-label {
+  font-size: 10px;
+}
+
+.room-code-value {
+}
+
+.room-link {
+  padding: 5px;
+}
+
+.room-label {
+}
+
+.room-link-value {
+  font-size: 10px;
+  color: blue;
+}
+
+.room-button {
+  width: 18px;
+  padding: 0px 5px;
+  cursor: pointer;
+}
+
+.room-button:hover {fill: #444;}
+
+.room-button.copy {
+}
+
+.room-button.new {
+}
+
+.user {
+}
+
+.user-label {
+  font-size: 10px;
+  text-align: center;
+}
+
+.user-circle {
+  border-radius: 100%;
+  margin: 0 5px;
+  font-size: 30px;
+  box-shadow: 0 0 2px 0 #000;
+}
+
+.user-icon {
+  padding: 4px 8px 1px 8px;
+}
+
+.players {
+}
+
+.players-label {
+  font-size: 10px;
+  padding-left: 10px;
+}
+
+.players-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.player-circle {
+  border-radius: 100%;
+  margin: 5px;
+  margin-right: 0;
+  font-size: 20px;
+  box-shadow: 0 0 2px 0 #000;
+}
+
+.user-circle.red,
+.player-circle.red {
+  background: hsl(0deg 80% 60%);
+}
+.user-circle.blue,
+.player-circle.blue {
+  background: hsl(240deg 80% 60%);
+}
+.user-circle.green,
+.player-circle.green {
+  background: hsl(120deg 80% 60%);
+}
+.user-circle.magenta,
+.player-circle.magenta {
+  background: hsl(300deg 80% 60%);
+}
+.user-circle.cyan,
+.player-circle.cyan {
+  background: hsl(180deg 80% 60%);
+}
+.user-circle.yellow,
+.player-circle.yellow {
+  background: hsl(60deg 80% 60%);
+}
+
+.player-icon {
+  padding: 2px 4px 1px 6px;
 }
