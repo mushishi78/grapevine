@@ -15,12 +15,14 @@ window.addEventListener("load", () => {
     icon: getUserIcon(),
     color: getUserColor(),
   };
+  const initialNewRoomCode = getRoomCode();
 
   ReactDom.render(
     React.createElement(App, {
       roomCode,
       socket,
       user,
+      initialNewRoomCode,
     }),
     document.querySelector("#root")
   );
@@ -29,6 +31,10 @@ window.addEventListener("load", () => {
 function App(props) {
   const [room, setRoom] = React.useState({ status: "connecting" });
   const [copied, setCopied] = React.useState(false);
+  const [newRoomCode, setNewRoomCode] = React.useState(
+    props.initialNewRoomCode
+  );
+  const [showNewRoomCode, setShowNewRoomCode] = React.useState(false);
 
   React.useEffect(() => {
     const { socket } = props;
@@ -77,7 +83,7 @@ function App(props) {
           div('room-label', {}, 'Room'),
           div('room-row', {},
             div('room-code-value', {}, room.roomCode),
-            div('room-button new', {}, raw(plusIcon)))),
+            div('room-button new', { onClick: () => setShowNewRoomCode(not) }, raw(plusIcon)))),
         div('room-link', {},
           div('room-label', {}, 'Link'),
           div('room-row', {},
@@ -85,6 +91,13 @@ function App(props) {
             div('room-button copy', { onClick: () => copy() }, raw(copyIcon)),
             div(`room-link-copied ${copied}`, {},
               'Copied!'))),
+      ),
+      div(`new-room-row ${showNewRoomCode}`, {},
+        div('new-room-title', {}, 'New Room'),
+        input('new-room-input', 'text', { value: newRoomCode, onChange: event => setNewRoomCode(event.target.value) }),
+        div('new-room-buttons', {},
+          div('new-room-button secondary', { onClick: () => setShowNewRoomCode(false) }, 'Cancel'),
+          a('new-room-button primary', `${location.origin}/${newRoomCode}`, {}, 'Go'))
       ),
       div('row', {},
         div('user', {},
@@ -115,6 +128,14 @@ function a(className, href, props, ...children) {
 
 function img(className, src, props, ...children) {
   return React.createElement("img", { className, src, ...props }, ...children);
+}
+
+function input(className, type, props, ...children) {
+  return React.createElement(
+    "input",
+    { className, type, ...props },
+    ...children
+  );
 }
 
 function raw(html) {
@@ -193,4 +214,8 @@ function buildArray(length, fn) {
 
 function timeout(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function not(b) {
+  return !b;
 }

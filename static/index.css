@@ -92,6 +92,68 @@ body {
 .room-button.new {
 }
 
+.new-room-row {
+  background: #eee;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  transform-origin: top;
+}
+
+.new-room-row.false {
+  transform: scaleY(0);
+  max-height: 0;
+  transition: transform 0.2s ease, max-height 0.2s ease 0.2s;
+}
+
+.new-room-row.true {
+  transform: scaleY(1);
+  max-height: 200px;
+  transition: transform 0.2s ease 0.2s, max-height 0.2s ease;
+}
+
+.new-room-title {
+  font-size: 10px;
+}
+
+.new-room-input {
+  padding: 5px;
+  margin: 5px;
+  box-sizing: border-box;
+}
+
+.new-room-buttons {
+  display: flex;
+  margin: 5px 0;
+}
+
+.new-room-button {
+  border: 1px solid #999;
+  border-radius: 3px;
+  padding: 3px;
+  min-width: 80px;
+  text-align: center;
+  text-decoration: none;
+  color: white;
+  background: #bbb;
+  cursor: pointer;
+  margin: 0 5px;
+  box-shadow: 1px 1px 2px 0 #c1c1c1;
+  font-size: 14px;
+}
+
+.new-room-button.secondary {
+}
+
+.new-room-button.primary {
+  background: #4c8ebf;
+  border-color: #3274a5;
+}
+
+.new-room-button:hover {
+  filter: brightness(1.2);
+}
+
 .user {
 }
 
