@@ -89,10 +89,10 @@ body {
 .room-button.copy {
 }
 
-.room-button.new {
+.room-button.edit {
 }
 
-.new-room-row {
+.edit-room-row {
   background: #eee;
   padding: 5px;
   display: flex;
@@ -100,34 +100,34 @@ body {
   transform-origin: top;
 }
 
-.new-room-row.false {
+.edit-room-row.false {
   transform: scaleY(0);
   max-height: 0;
   transition: transform 0.2s ease, max-height 0.2s ease 0.2s;
 }
 
-.new-room-row.true {
+.edit-room-row.true {
   transform: scaleY(1);
   max-height: 200px;
   transition: transform 0.2s ease 0.2s, max-height 0.2s ease;
 }
 
-.new-room-title {
+.edit-room-title {
   font-size: 10px;
 }
 
-.new-room-input {
+.edit-room-input {
   padding: 5px;
   margin: 5px;
   box-sizing: border-box;
 }
 
-.new-room-buttons {
+.edit-room-buttons {
   display: flex;
   margin: 5px 0;
 }
 
-.new-room-button {
+.edit-room-button {
   border: 1px solid #999;
   border-radius: 3px;
   padding: 3px;
@@ -142,15 +142,15 @@ body {
   font-size: 14px;
 }
 
-.new-room-button.secondary {
+.edit-room-button.secondary {
 }
 
-.new-room-button.primary {
+.edit-room-button.primary {
   background: #4c8ebf;
   border-color: #3274a5;
 }
 
-.new-room-button:hover {
+.edit-room-button:hover {
   filter: brightness(1.2);
 }
 

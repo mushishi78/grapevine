@@ -4,7 +4,7 @@ const ReactDom = require("react-dom");
 const uuid = require("uuid");
 const copyToClipboard = require("copy-to-clipboard");
 
-const plusIcon = require("/eva-icons/fill/svg/plus.svg");
+const editIcon = require("/eva-icons/fill/svg/edit.svg");
 const copyIcon = require("/eva-icons/fill/svg/copy.svg");
 
 window.addEventListener("load", () => {
@@ -15,14 +15,12 @@ window.addEventListener("load", () => {
     icon: getUserIcon(),
     color: getUserColor(),
   };
-  const initialNewRoomCode = getRoomCode();
 
   ReactDom.render(
     React.createElement(App, {
       roomCode,
       socket,
       user,
-      initialNewRoomCode,
     }),
     document.querySelector("#root")
   );
@@ -31,9 +29,7 @@ window.addEventListener("load", () => {
 function App(props) {
   const [room, setRoom] = React.useState({ status: "connecting" });
   const [copied, setCopied] = React.useState(false);
-  const [newRoomCode, setNewRoomCode] = React.useState(
-    props.initialNewRoomCode
-  );
+  const [newRoomCode, setNewRoomCode] = React.useState("");
   const [showNewRoomCode, setShowNewRoomCode] = React.useState(false);
 
   React.useEffect(() => {
@@ -60,6 +56,11 @@ function App(props) {
     });
   }, []);
 
+  React.useEffect(() => {
+    if (!showNewRoomCode) return;
+    document.querySelector(".edit-room-input").focus();
+  }, [showNewRoomCode]);
+
   async function copy() {
     if (copied) return;
     copyToClipboard(location.href);
@@ -83,7 +84,7 @@ function App(props) {
           div('room-label', {}, 'Room'),
           div('room-row', {},
             div('room-code-value', {}, room.roomCode),
-            div('room-button new', { onClick: () => setShowNewRoomCode(not) }, raw(plusIcon)))),
+            div('room-button edit', { onClick: () => setShowNewRoomCode(not) }, raw(editIcon)))),
         div('room-link', {},
           div('room-label', {}, 'Link'),
           div('room-row', {},
@@ -92,12 +93,12 @@ function App(props) {
             div(`room-link-copied ${copied}`, {},
               'Copied!'))),
       ),
-      div(`new-room-row ${showNewRoomCode}`, {},
-        div('new-room-title', {}, 'New Room'),
-        input('new-room-input', 'text', { value: newRoomCode, onChange: event => setNewRoomCode(event.target.value) }),
-        div('new-room-buttons', {},
-          div('new-room-button secondary', { onClick: () => setShowNewRoomCode(false) }, 'Cancel'),
-          a('new-room-button primary', `${location.origin}/${newRoomCode}`, {}, 'Go'))
+      div(`edit-room-row ${showNewRoomCode}`, {},
+        div('edit-room-title', {}, 'Enter Room'),
+        input('edit-room-input', 'text', { value: newRoomCode, onChange: event => setNewRoomCode(event.target.value) }),
+        div('edit-room-buttons', {},
+          div('edit-room-button secondary', { onClick: () => setShowNewRoomCode(false) }, 'Cancel'),
+          a('edit-room-button primary', `${location.origin}/${newRoomCode}`, {}, 'Go'))
       ),
       div('row', {},
         div('user', {},
