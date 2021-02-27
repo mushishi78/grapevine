@@ -241,12 +241,12 @@ body {
 .content {
   flex-grow: 1;
   overflow-y: scroll;
+  margin: 5px 0;
+  padding: 10px;
 }
 
 .content.loby {
   text-align: center;
-  margin: 5px 0;
-  padding: 10px;
   display: flex;
   flex-direction: column;
 }
@@ -270,10 +270,9 @@ body {
 .game-explanation {
   padding: 20px 0;
   color: #128813;
-  flex-grow: 1;
   font-size: 14px;
   max-width: 50ch;
-  margin: auto;
+  margin: 0 auto;
 }
 
 .waiting {
@@ -292,8 +291,31 @@ body {
   background: #74c374;
   color: white;
   font-size: 25px;
-  text-transform: uppercase;
   cursor: pointer;
   border: 1px solid #3eb33f;
   box-shadow: inset 0 0 15px 0 #d5f7d5;
+  margin-top: auto;
+}
+
+.content.countdown {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.countdown_explanation {
+  padding: 15px;
+}
+
+.countdown_count {
+  font-size: 50px;
+  padding: 25px;
+}
+
+.countdown_cancel {
+  padding: 25px;
+  cursor: pointer;
+  background: #ddd;
+  border-radius: 4px;
+  margin-top: auto;
 }

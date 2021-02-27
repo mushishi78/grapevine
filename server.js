@@ -31,19 +31,19 @@ io.on("connection", (socket) => {
   console.log("connected:", socket.id);
 
   socket.on("join", (roomCode, user) => {
-    const player = { ...user, socketId: socket.id };
-    const emptyRoom = { roomCode, status: "loby", players: [] };
+    user = { ...user, socketId: socket.id };
+    const emptyRoom = { roomCode, status: "loby", users: [] };
 
-    // Add player to room map
+    // Add user to room map
     const room = rooms.get(roomCode) || emptyRoom;
-    room.players = room.players.concat(player);
+    room.users = room.users.concat(user);
     rooms.set(roomCode, room);
 
     // Connect to socket room
     socket.join(roomCode);
 
-    // Broadcast that player has joined
-    io.to(roomCode).emit("joined", player, room);
+    // Broadcast that user has joined
+    io.to(roomCode).emit("joined", user, room);
   });
 
   socket.on("disconnecting", () => {
@@ -55,19 +55,104 @@ io.on("connection", (socket) => {
       const room = rooms.get(roomCode);
       if (room == null) continue;
 
-      // Find the session id
-      const player = room.players.find((p) => p.socketId === socket.id);
+      // If now empty, remove room
+      if (room.users.length <= 1) {
+        rooms.delete(roomCode);
+        continue;
+      }
 
-      // Remove player from room
-      room.players = room.players.filter((p) => p.socketId !== socket.id);
+      // Find the user
+      const user = room.users.find((u) => u.socketId === socket.id);
+
+      // Remove user from room
+      room.users = room.users.filter((u) => u.socketId !== socket.id);
+
+      // Update the room
       rooms.set(roomCode, room);
 
-      // Broadcast to other players
-      socket.broadcast.to(roomCode).emit("left", player, room);
+      // Broadcast to other users
+      socket.broadcast.to(roomCode).emit("left", user, room);
     }
+  });
+
+  socket.on("start", async (roomCode) => {
+    // Get the room
+    let room = rooms.get(roomCode);
+    if (room == null) return;
+
+    // Find the user
+    const user = room.users.find((u) => u.socketId === socket.id);
+
+    // If not a user, ignore
+    if (user == null) return;
+
+    // If not in loby, ignore
+    if (room.status !== "loby") return;
+
+    // Update room status
+    room = { ...room, status: "countdown" };
+    rooms.set(roomCode, room);
+
+    // Countdown from 10
+    for (let i = 10; i > 0; i--) {
+      // Refetch the room
+      room = rooms.get(roomCode);
+      if (room == null) return;
+      if (room.status !== "countdown") return;
+
+      // Update count
+      room = { ...room, count: i };
+      rooms.set(roomCode, room);
+      io.to(roomCode).emit("countdown", room);
+
+      // Wait 1 second
+      await timeout(1000);
+    }
+
+    // Refetch the room
+    room = rooms.get(roomCode);
+    if (room == null) return;
+    if (room.status !== "countdown") return;
+
+    // Update to playing status
+    room = {
+      ...room,
+      status: "playing",
+      players: room.users.map((u) => u.sessionId),
+      round: 0,
+    };
+    rooms.set(roomCode, room);
+    io.to(roomCode).emit("started", room);
+  });
+
+  socket.on("cancel", async (roomCode) => {
+    // Get the room
+    let room = rooms.get(roomCode);
+    if (room == null) return;
+
+    // Find the user
+    const user = room.users.find((u) => u.socketId === socket.id);
+
+    // If not a user, ignore
+    if (user == null) return;
+
+    // If not in countdown, ignore
+    if (room.status !== "countdown") return;
+
+    // Update to loby status
+    room = { ...room, status: "loby" };
+    rooms.set(roomCode, room);
+    io.to(roomCode).emit("cancelled", room);
   });
 });
 
 httpServer.listen(3000, () => {
   console.log("Listening on http://localhost:3000");
 });
+
+//
+// Helpers
+
+function timeout(ms) {
+  return new Promise((resolve) => setInterval(resolve, ms));
+}

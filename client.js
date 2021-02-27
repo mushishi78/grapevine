@@ -54,6 +54,21 @@ function App(props) {
       console.log("Player left: ", player);
       setRoom(room);
     });
+
+    socket.on("countdown", (room) => {
+      console.log("Countdown :", room.count);
+      setRoom(room);
+    });
+
+    socket.on("started", (room) => {
+      console.log("Game started");
+      setRoom(room);
+    });
+
+    socket.on("cancelled", (room) => {
+      console.log("Cancelled");
+      setRoom(room);
+    });
   }, []);
 
   React.useEffect(() => {
@@ -69,9 +84,17 @@ function App(props) {
     setCopied(false);
   }
 
+  function start() {
+    props.socket.emit("start", props.roomCode);
+  }
+
+  function cancel() {
+    props.socket.emit("cancel", props.roomCode);
+  }
+
   function content() {
     if (room.status === "loby") {
-      const canStart = room.players.length >= 4;
+      const canStart = room.users.length >= 4;
 
       // prettier-ignore
       return div('content loby', {},
@@ -83,10 +106,18 @@ function App(props) {
           clue the chain of guesses gets and hilarity ensues.
         `),
         canStart && (
-          div('start-button', {}, 'Start')),
+          div('start-button', { onClick: start }, 'Start')),
         !canStart && (
           div('waiting', {}, 'Need at least ', bold('4'), ' players to Start')
         ))
+    }
+
+    if (room.status === "countdown") {
+      // prettier-ignore
+      return div('content countdown', {},
+        div('countdown_explanation', {}, 'Game starting in'),
+        div('countdown_count', {}, room.count),
+        div('countdown_cancel', { onClick: cancel }, 'Cancel'))
     }
   }
 
@@ -128,7 +159,7 @@ function App(props) {
       div('players', {},
         div('players-label', {}, 'Players'),
         div('players-row', {},
-          room.players.map(player =>
+          room.users.map(player =>
             div(`player-circle ${player.color}`, { key: player.socketId },
               div('player-icon', {}, player.icon)))))
     ),
