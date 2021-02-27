@@ -124,8 +124,7 @@ function App(props) {
   if (room.status === "connecting") {
     // prettier-ignore
     return div('full-page', {},
-      div('full-page-box', {},
-        div('full-page-message', {}, 'Connecting....')));
+      div('full-page-message', {}, 'Connecting....'));
   }
 
   // prettier-ignore
