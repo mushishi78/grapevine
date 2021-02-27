@@ -69,6 +69,27 @@ function App(props) {
     setCopied(false);
   }
 
+  function content() {
+    if (room.status === "loby") {
+      const canStart = room.players.length >= 4;
+
+      // prettier-ignore
+      return div('content loby', {},
+        div('content_title', {}, 'Grapevine'),
+        div('game-explanation', {}, `
+          A drawing guessing game where players must try to draw a clue, then
+          the next player tries to guess the clue and the next player tries
+          to draw their guess and so on. See how far away from the original
+          clue the chain of guesses gets and hilarity ensues.
+        `),
+        canStart && (
+          div('start-button', {}, 'Start')),
+        !canStart && (
+          div('waiting', {}, 'Need at least ', bold('4'), ' players to Start')
+        ))
+    }
+  }
+
   if (room.status === "connecting") {
     // prettier-ignore
     return div('full-page', {},
@@ -76,44 +97,43 @@ function App(props) {
         div('full-page-message', {}, 'Connecting....')));
   }
 
-  if (room.status === "loby") {
-    // prettier-ignore
-    return div('loby', {},
-      div('row', {},
-        div('room-code', {},
-          div('room-label', {}, 'Room'),
-          div('room-row', {},
-            div('room-code-value', {}, room.roomCode),
-            div('room-button edit', { onClick: () => setShowNewRoomCode(not) }, raw(editIcon)))),
-        div('room-link', {},
-          div('room-label', {}, 'Link'),
-          div('room-row', {},
-            a('room-link-value', location.href, {}, location.href),
-            div('room-button copy', { onClick: () => copy() }, raw(copyIcon)),
-            div(`room-link-copied ${copied}`, {},
-              'Copied!'))),
-      ),
-      div(`edit-room-row ${showNewRoomCode}`, {},
-        div('edit-room-title', {}, 'Enter Room'),
-        input('edit-room-input', 'text', { value: newRoomCode, onChange: event => setNewRoomCode(event.target.value) }),
-        div('edit-room-buttons', {},
-          div('edit-room-button secondary', { onClick: () => setShowNewRoomCode(false) }, 'Cancel'),
-          a('edit-room-button primary', `${location.origin}/${newRoomCode}`, {}, 'Go'))
-      ),
-      div('row', {},
-        div('user', {},
-          div('user-label', {}, 'You'),
-          div(`user-circle ${props.user.color}`, {},
-            div(`user-icon`, {}, props.user.icon))),
-        div('players', {},
-          div('players-label', {}, 'Players'),
-          div('players-row', {},
-            room.players.map(player =>
-              div(`player-circle ${player.color}`, { key: player.socketId },
-                div('player-icon', {}, player.icon)))))
-      )
-    )
-  }
+  // prettier-ignore
+  return div('page', {},
+    div('row', {},
+      div('room-code', {},
+        div('room-label', {}, 'Room'),
+        div('room-row', {},
+          div('room-code-value', {}, room.roomCode),
+          div('room-button edit', { onClick: () => setShowNewRoomCode(not) }, raw(editIcon)))),
+      div('room-link', {},
+        div('room-label', {}, 'Link'),
+        div('room-row', {},
+          a('room-link-value', location.href, {}, location.href),
+          div('room-button copy', { onClick: () => copy() }, raw(copyIcon)),
+          div(`room-link-copied ${copied}`, {},
+            'Copied!'))),
+    ),
+    div(`edit-room-row ${showNewRoomCode}`, {},
+      div('edit-room-title', {}, 'Enter Room'),
+      input('edit-room-input', 'text', { value: newRoomCode, onChange: event => setNewRoomCode(event.target.value) }),
+      div('edit-room-buttons', {},
+        div('edit-room-button secondary', { onClick: () => setShowNewRoomCode(false) }, 'Cancel'),
+        a('edit-room-button primary', `${location.origin}/${newRoomCode}`, {}, 'Go'))
+    ),
+    div('row', {},
+      div('user', {},
+        div('user-label', {}, 'You'),
+        div(`user-circle ${props.user.color}`, {},
+          div(`user-icon`, {}, props.user.icon))),
+      div('players', {},
+        div('players-label', {}, 'Players'),
+        div('players-row', {},
+          room.players.map(player =>
+            div(`player-circle ${player.color}`, { key: player.socketId },
+              div('player-icon', {}, player.icon)))))
+    ),
+    content()
+  )
 }
 
 //
@@ -143,6 +163,10 @@ function raw(html) {
   return React.createElement("div", {
     dangerouslySetInnerHTML: { __html: html },
   });
+}
+
+function bold(...children) {
+  return React.createElement("b", {}, ...children);
 }
 
 //
