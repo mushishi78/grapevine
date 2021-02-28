@@ -244,7 +244,7 @@ body {
   flex-direction: column;
 }
 
-.content_title {
+.game_title {
   font-size: 35px;
   color: #2d6f2d;
   text-decoration: wavy;
@@ -272,6 +272,7 @@ body {
   padding: 25px;
   background: #effbef;
   font-size: 20px;
+  margin-top: auto;
 }
 
 .waiting b {
@@ -311,4 +312,86 @@ body {
   background: #ddd;
   border-radius: 4px;
   margin-top: auto;
+}
+
+.content.initial-clue {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+  padding: 5px;
+}
+
+.initial-clue_title {
+  padding: 15px 0;
+  font-size: 35px;
+}
+
+.initial-clue_explanation {
+  font-size: 14px;
+  max-width: 50ch;
+}
+
+.InputClue {
+  display: flex;
+  align-items: flex-end;
+  margin-top: auto;
+}
+
+.InputClue_input {
+  padding: 10px;
+  flex-grow: 1;
+  font-size: 25px;
+}
+
+.InputClue_confirm {
+  min-width: 25px;
+  padding: 14px;
+  cursor: pointer;
+  background: #74c374;
+  border-radius: 4px;
+  fill: #fff;
+  margin-left: 5px;
+}
+
+.content.drawing {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding-top: 0;
+}
+
+.row.clue_and_count {
+  flex-shrink: 0;
+  margin-bottom: 10px;
+  justify-content: space-between;
+}
+
+.drawing_clue {
+}
+
+.drawing_clue_label {
+  font-size: 10px;
+}
+
+.drawing_clue_value {
+  font-size: 25px;
+  color: #57cc61;
+}
+
+.drawing_count {
+}
+
+.drawing_count_label {
+  font-size: 10px;
+}
+
+.drawing_count_value {
+  font-size: 25px;
+  color: #5057b1;
+}
+
+.Pad {
+  border: 1px solid #666;
+  overflow: scroll;
+  flex-grow: 1;
 }

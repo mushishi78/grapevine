@@ -3,9 +3,12 @@ const React = require("react");
 const ReactDom = require("react-dom");
 const uuid = require("uuid");
 const copyToClipboard = require("copy-to-clipboard");
+const { fabric } = require("fabric");
+const Shared = require("./shared");
 
 const editIcon = require("/eva-icons/fill/svg/edit.svg");
 const copyIcon = require("/eva-icons/fill/svg/copy.svg");
+const checkmarkIcon = require("/eva-icons/fill/svg/checkmark.svg");
 
 window.addEventListener("load", () => {
   const roomCode = getRoomCode();
@@ -61,12 +64,37 @@ function App(props) {
     });
 
     socket.on("started", (room) => {
-      console.log("Game started");
+      console.log("Game started: ", room);
       setRoom(room);
     });
 
     socket.on("cancelled", (room) => {
-      console.log("Cancelled");
+      console.log("Cancelled: ", room);
+      setRoom(room);
+    });
+
+    socket.on("answer-submitted", (room, answer) => {
+      console.log("Answer submitted: ", answer);
+      setRoom(room);
+    });
+
+    socket.on("new-drawing-round", (room) => {
+      console.log("New drawing round");
+      setRoom(room);
+    });
+
+    socket.on("tick", (room) => {
+      console.log("Tick :", room.ticks);
+      setRoom(room);
+    });
+
+    socket.on("new-guess-round", (room) => {
+      console.log("New guessing round");
+      setRoom(room);
+    });
+
+    socket.on("marking-started", (room) => {
+      console.log("Marking started");
       setRoom(room);
     });
   }, []);
@@ -92,13 +120,22 @@ function App(props) {
     props.socket.emit("cancel", props.roomCode);
   }
 
+  function submitAnswer(answerValue) {
+    props.socket.emit("submit-answer", props.roomCode, answerValue);
+  }
+
+  function onNewPath(newPath, canvasObject) {
+    submitAnswer(canvasObject);
+  }
+
   function content() {
     if (room.status === "loby") {
-      const canStart = room.users.length >= 4;
+      const playerMin = 3;
+      const canStart = room.users.length >= playerMin;
 
       // prettier-ignore
       return div('content loby', {},
-        div('content_title', {}, 'Grapevine'),
+        div('game_title', {}, 'Grapevine'),
         div('game-explanation', {}, `
           A drawing guessing game where players must try to draw a clue, then
           the next player tries to guess the clue and the next player tries
@@ -108,7 +145,7 @@ function App(props) {
         canStart && (
           div('start-button', { onClick: start }, 'Start')),
         !canStart && (
-          div('waiting', {}, 'Need at least ', bold('4'), ' players to Start')
+          div('waiting', {}, 'Need at least ', bold(playerMin), ' players to Start')
         ))
     }
 
@@ -118,6 +155,51 @@ function App(props) {
         div('countdown_explanation', {}, 'Game starting in'),
         div('countdown_count', {}, room.count),
         div('countdown_cancel', { onClick: cancel }, 'Cancel'))
+    }
+
+    if (room.status === "playing" && room.round === 0) {
+      const playerIndex = room.players.findIndex(
+        (p) => p.sessionId === props.user.sessionId
+      );
+      const answerSubmitted = room.chains[playerIndex][0] != null;
+
+      if (answerSubmitted) {
+        // prettier-ignore
+        return div('content initial-clue', {},
+          div('initial-clue_title', {}, 'Initial Clue'),
+          div('initial-clue_explanation', {}, `
+            Clue submitted waiting for other players
+          `))
+      }
+
+      // prettier-ignore
+      return div('content initial-clue', {},
+        div('initial-clue_title', {}, 'Initial Clue'),
+        div('initial-clue_explanation', {}, `
+          Please think of an initial clue to start the game.
+          Your fellow team mate will be asked to draw it, so think hard!
+        `),
+        component(InputClue, { onConfirm: submitAnswer }))
+    }
+
+    if (room.status === "playing" && room.round % 2 === 1) {
+      const chainIndex = Shared.getChainIndex(room, props.user.sessionId);
+      const chain = room.chains[chainIndex];
+      const previousAnswer = chain[room.round - 1];
+      const currentAnswer = chain[room.round];
+      const fabricObjects = currentAnswer != null ? currentAnswer.value : null;
+
+      // prettier-ignore
+      return div('content drawing', {},
+        div('row clue_and_count', {},
+          div('drawing_clue', {},
+            div('drawing_clue_label', {}, "Clue"),
+            div('drawing_clue_value', {}, previousAnswer.value)),
+          div('drawing_count', {},
+            div('drawing_count_label', {}, "Count"),
+            div('drawing_count_value', {}, room.ticks))
+        ),
+        component(Pad, { onNewPath, fabricObjects }))
     }
   }
 
@@ -166,8 +248,71 @@ function App(props) {
   )
 }
 
+function InputClue({ onConfirm }) {
+  const [value, setValue] = React.useState("");
+
+  React.useEffect(() => {
+    document.querySelector(".InputClue_input").focus();
+  }, []);
+
+  // prettier-ignore
+  return div('InputClue', {},
+    textarea('InputClue_input', { value, rows: 2, onChange: (event) => setValue(event.target.value) }),
+    div('InputClue_confirm', { onClick: () => onConfirm(value) }, raw(checkmarkIcon)))
+}
+
+function Pad({ onNewPath, fabricObjects }) {
+  const canvasRef = React.useRef();
+
+  React.useEffect(() => {
+    const padElem = document.querySelector(".Pad");
+    const canvasElem = document.querySelector(".Pad_canvas");
+    canvasRef.current = new fabric.Canvas(canvasElem, {
+      isDrawingMode: true,
+      width: padElem.clientWidth,
+      height: padElem.clientHeight,
+    });
+
+    canvasRef.current.freeDrawingBrush.width = 3;
+
+    canvasRef.current.on("path:created", ({ path }) => {
+      onNewPath(path.toObject(), canvasRef.current.toObject());
+    });
+
+    window.addEventListener("resize", onResize);
+
+    if (fabricObjects != null) {
+      canvasRef.current.loadFromJSON(
+        fabricObjects,
+        canvasRef.current.renderAll.bind(canvasRef.current)
+      );
+    }
+
+    return () => {
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
+
+  function onResize() {
+    const padElem = document.querySelector(".Pad");
+
+    canvasRef.current.setDimensions({
+      width: padElem.clientWidth,
+      height: padElem.clientHeight,
+    });
+  }
+
+  // prettier-ignore
+  return div("Pad", {},
+    canvas("Pad_canvas"));
+}
+
 //
 // React helpers
+
+function component(component, ...children) {
+  return React.createElement(component, ...children);
+}
 
 function div(className, props, ...children) {
   return React.createElement("div", { className, ...props }, ...children);
@@ -189,6 +334,10 @@ function input(className, type, props, ...children) {
   );
 }
 
+function textarea(className, props, ...children) {
+  return React.createElement("textarea", { className, ...props }, ...children);
+}
+
 function raw(html) {
   return React.createElement("div", {
     dangerouslySetInnerHTML: { __html: html },
@@ -197,6 +346,10 @@ function raw(html) {
 
 function bold(...children) {
   return React.createElement("b", {}, ...children);
+}
+
+function canvas(className, props, ...children) {
+  return React.createElement("canvas", { className, ...props }, ...children);
 }
 
 //
