@@ -158,10 +158,8 @@ function App(props) {
     }
 
     if (room.status === "playing" && room.round === 0) {
-      const playerIndex = room.players.findIndex(
-        (p) => p.sessionId === props.user.sessionId
-      );
-      const answerSubmitted = room.chains[playerIndex][0] != null;
+      const chainIndex = Shared.getChainIndex(room, props.user.sessionId);
+      const answerSubmitted = room.chains[chainIndex][room.round] != null;
 
       if (answerSubmitted) {
         // prettier-ignore
@@ -200,6 +198,30 @@ function App(props) {
             div('drawing_count_value', {}, room.ticks))
         ),
         component(Pad, { onNewPath, fabricObjects }))
+    }
+
+    if (room.status === "playing" && room.round % 2 === 0) {
+      const chainIndex = Shared.getChainIndex(room, props.user.sessionId);
+      const chain = room.chains[chainIndex];
+      const previousAnswer = chain[room.round - 1];
+      const answerSubmitted = chain[room.round] != null;
+      const fabricObjects =
+        previousAnswer != null ? previousAnswer.value : null;
+
+      if (answerSubmitted) {
+        // prettier-ignore
+        return div('content guess', {},
+          div('guess_title', {}, 'Guess'),
+          div('guess_explanation', {}, `
+            Guess submitted waiting for other players
+          `))
+      }
+
+      // prettier-ignore
+      return div('content guess', {},
+        component(Pad, { fabricObjects }),
+        div('guess_title', {}, 'Guess'),
+        component(InputClue, { onConfirm: submitAnswer }))
     }
   }
 
@@ -268,9 +290,10 @@ function Pad({ onNewPath, fabricObjects }) {
     const padElem = document.querySelector(".Pad");
     const canvasElem = document.querySelector(".Pad_canvas");
     canvasRef.current = new fabric.Canvas(canvasElem, {
-      isDrawingMode: true,
+      isDrawingMode: onNewPath != null,
       width: padElem.clientWidth,
       height: padElem.clientHeight,
+      selection: false,
     });
 
     canvasRef.current.freeDrawingBrush.width = 3;
@@ -282,10 +305,7 @@ function Pad({ onNewPath, fabricObjects }) {
     window.addEventListener("resize", onResize);
 
     if (fabricObjects != null) {
-      canvasRef.current.loadFromJSON(
-        fabricObjects,
-        canvasRef.current.renderAll.bind(canvasRef.current)
-      );
+      canvasRef.current.loadFromJSON(fabricObjects);
     }
 
     return () => {

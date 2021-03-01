@@ -395,3 +395,24 @@ body {
   overflow: scroll;
   flex-grow: 1;
 }
+
+.content.guess {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.content.guess .Pad {
+  /* margin: 5px 0; */
+  border-color: #ccc;
+}
+
+.guess_title {
+  font-size: 20px;
+  padding-top: 5px;
+}
+
+.guess_explanation {
+  font-size: 15px;
+  padding-top: 10px;
+}
