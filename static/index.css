@@ -196,31 +196,42 @@ body {
   font-size: 20px;
 }
 
+.answer_user-circle.red,
 .user-circle.red,
 .player-circle.red {
   background: hsl(0deg 80% 60%);
   box-shadow: 0 0 5px 0 hsl(0deg 80% 35%);
 }
+
+.answer_user-circle.blue,
 .user-circle.blue,
 .player-circle.blue {
   background: hsl(240deg 80% 60%);
   box-shadow: 0 0 5px 0 hsl(240deg 80% 35%);
 }
+
+.answer_user-circle.green,
 .user-circle.green,
 .player-circle.green {
   background: hsl(120deg 80% 60%);
   box-shadow: 0 0 5px 0 hsl(120deg 80% 35%);
 }
+
+.answer_user-circle.magenta,
 .user-circle.magenta,
 .player-circle.magenta {
   background: hsl(300deg 80% 60%);
   box-shadow: 0 0 5px 0 hsl(300deg 80% 35%);
 }
+
+.answer_user-circle.cyan,
 .user-circle.cyan,
 .player-circle.cyan {
   background: hsl(180deg 80% 60%);
   box-shadow: 0 0 5px 0 hsl(180deg 80% 35%);
 }
+
+.answer_user-circle.yellow,
 .user-circle.yellow,
 .player-circle.yellow {
   background: hsl(60deg 80% 60%);
@@ -236,6 +247,7 @@ body {
   overflow-y: scroll;
   margin: 5px 0;
   padding: 10px;
+  box-sizing: border-box;
 }
 
 .content.loby {
@@ -391,9 +403,10 @@ body {
 }
 
 .Pad {
-  border: 1px solid #666;
+  border: 1px solid #bbb;
   overflow: scroll;
   flex-grow: 1;
+  background: white;
 }
 
 .content.guess {
@@ -415,4 +428,106 @@ body {
 .guess_explanation {
   font-size: 15px;
   padding-top: 10px;
+}
+
+.content.marking {padding: 0;}
+
+.marking_title {
+  font-size: 20px;
+  padding: 5px 10px 0;
+}
+
+.marking_chains {
+  padding: 10px 0;
+}
+
+.marking_chain {
+  display: flex;
+  padding: 15px 0;
+  margin-bottom: 10px;
+  overflow-x: auto;
+  width: 100%;
+  box-sizing: border-box;
+  background: #fafafa;
+}
+
+.marking_answer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 5px;
+  background: #fafafa;
+  padding: 7px;
+  box-shadow: 0 0 3px 0 #ccc8c8;
+  border-radius: 5px;
+  padding-bottom: 0px;
+}
+
+.marking_answer.red {
+  background: hsl(0deg 80% 95%);
+}
+
+.marking_answer.blue {
+  background: hsl(240deg 80% 95%);
+}
+
+.marking_answer.green {
+  background: hsl(120deg 80% 95%);
+}
+
+.marking_answer.magenta {
+  background: hsl(300deg 80% 95%);
+}
+
+.marking_answer.cyan {
+  background: hsl(180deg 90% 95%);
+}
+
+.marking_answer.yellow {
+  background: hsl(60deg 80% 95%);
+}
+
+.marking_spacer {
+  padding-right: 5px;
+}
+
+.answer_user-circle {
+  border-radius: 100%;
+  font-size: 16px;
+  align-self: flex-start;
+  box-shadow: 0 0 5px -1px #666 !important;
+  border: 1px solid #fff;
+}
+
+.answer_user-icon {
+  padding: 0px 2px 1px 5px;
+}
+
+.answer_text {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  padding: 20px;
+}
+
+.answer_drawing {
+  margin: 10px 0;
+}
+
+.answer_buttons {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.answer_button {
+  padding: 5px 8px;
+  cursor: pointer;
+  font-size: 22px;
+}
+
+.answer_button.down {
+}
+
+.answer_button.up {
 }

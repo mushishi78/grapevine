@@ -223,6 +223,34 @@ function App(props) {
         div('guess_title', {}, 'Guess'),
         component(InputClue, { onConfirm: submitAnswer }))
     }
+
+    if (room.status === "marking") {
+      // prettier-ignore
+      return div('content marking', {},
+        div('marking_title', {}, 'Marking'),
+        div('marking_chains', {},
+          room.chains.map((chain, chainIndex) =>
+            div('marking_chain', { key: chainIndex },
+              chain.map((answer, roundIndex) =>
+                answer == null ? null :
+                  div(`marking_answer ${answer.user.color}`, { key: roundIndex },
+                    div(`answer_user-circle ${answer.user.color}`, {},
+                      div(`answer_user-icon`, {}, answer.user.icon)),
+                    roundIndex % 2 == 0
+                      ? div('answer_text', {}, answer.value)
+                      : div('answer_drawing', {},
+                        component(Pad, { fabricObjects: answer.value })),
+
+                    answer.user.sessionId === props.user.sessionId ? null :
+                      div('answer_buttons', {},
+                        div('answer_button down', {}, '👎'),
+                        div('answer_button up', {}, '👍'),
+                      ))),
+              div('marking_spacer')
+            ))
+        )
+      )
+    }
   }
 
   if (room.status === "connecting") {
@@ -284,11 +312,12 @@ function InputClue({ onConfirm }) {
 }
 
 function Pad({ onNewPath, fabricObjects }) {
+  const padRef = React.useRef();
   const canvasRef = React.useRef();
 
   React.useEffect(() => {
-    const padElem = document.querySelector(".Pad");
-    const canvasElem = document.querySelector(".Pad_canvas");
+    const padElem = padRef.current;
+    const canvasElem = padElem.querySelector(".Pad_canvas");
     canvasRef.current = new fabric.Canvas(canvasElem, {
       isDrawingMode: onNewPath != null,
       width: padElem.clientWidth,
@@ -341,7 +370,7 @@ function Pad({ onNewPath, fabricObjects }) {
   }
 
   // prettier-ignore
-  return div("Pad", {},
+  return div("Pad", { ref: padRef },
     canvas("Pad_canvas"));
 }
 
