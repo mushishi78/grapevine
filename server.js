@@ -38,7 +38,7 @@ io.on("connection", (socket) => {
 
   socket.on("join", (roomCode, user) => {
     user = { ...user, socketId: socket.id };
-    const emptyRoom = { roomCode, status: "loby", users: [] };
+    const emptyRoom = { roomCode, status: "lobby", users: [] };
 
     // Add user to room map
     let room = rooms.get(roomCode) || emptyRoom;
@@ -94,8 +94,8 @@ io.on("connection", (socket) => {
     // If not a user, ignore
     if (user == null) return;
 
-    // If not in loby, ignore
-    if (room.status !== "loby") return;
+    // If not in lobby, ignore
+    if (room.status !== "lobby") return;
 
     // Update room status
     room = { ...room, status: "countdown" };
@@ -151,8 +151,8 @@ io.on("connection", (socket) => {
     // If not in countdown, ignore
     if (room.status !== "countdown") return;
 
-    // Update to loby status
-    room = { ...room, status: "loby" };
+    // Update to lobby status
+    room = { ...room, status: "lobby" };
     rooms.set(roomCode, room);
     io.to(roomCode).emit("cancelled", room);
   });
@@ -329,9 +329,30 @@ io.on("connection", (socket) => {
     // If game finished
     if (finished.length === room.players.length) {
       room = { ...room, status: "finished" };
+      rooms.set(roomCode, room);
       io.to(roomCode).emit("game-finished", room);
       log("emit game-finished");
     }
+  });
+
+  socket.on("return-to-lobby", async (roomCode) => {
+    // Get the room
+    let room = rooms.get(roomCode);
+    if (room == null) return;
+
+    // Find the user
+    const user = room.users.find((u) => u.socketId === socket.id);
+
+    // If not a user, ignore
+    if (user == null) return;
+
+    // If not in finished, ignore
+    if (room.status !== "finished") return;
+
+    // Update to lobby status
+    room = { roomCode, status: "lobby", users: room.users };
+    rooms.set(roomCode, room);
+    io.to(roomCode).emit("returned-to-lobby", room);
   });
 });
 

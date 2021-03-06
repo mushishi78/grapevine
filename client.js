@@ -112,6 +112,11 @@ function App(props) {
       console.log("Game finished");
       setRoom(room);
     });
+
+    socket.on("returned-to-lobby", (room) => {
+      console.log("Returned to Loby");
+      setRoom(room);
+    });
   }, []);
 
   React.useEffect(() => {
@@ -157,13 +162,17 @@ function App(props) {
     props.socket.emit("submit-finished", props.roomCode);
   }
 
+  function onReturnToLobby() {
+    props.socket.emit("return-to-lobby", props.roomCode);
+  }
+
   function content() {
-    if (room.status === "loby") {
+    if (room.status === "lobby") {
       const playerMin = 3;
       const canStart = room.users.length >= playerMin;
 
       // prettier-ignore
-      return div('content loby', {},
+      return div('content lobby', {},
         div('game_title', {}, 'Grapevine'),
         div('game-explanation', {}, `
           A drawing guessing game where players must try to draw a clue, then
@@ -269,9 +278,9 @@ function App(props) {
                 const playerIndex = Shared.getPlayerIndex(room, props.user.sessionId);
                 const marking = room.markings[playerIndex][chainIndex][roundIndex];
                 const marked = marking != null ? 'marked' : ''
-                const downMarked = marking === 0 ? 'selected' : marking === 1 ? 'not-selected' : ''
-                const upMarked = marking === 1 ? 'selected' : marking === 0 ? 'not-selected' : ''
-                const onDown = () => submitMarking(chainIndex, roundIndex, 0)
+                const downMarked = marking === -1 ? 'selected' : marking === 1 ? 'not-selected' : ''
+                const upMarked = marking === 1 ? 'selected' : marking === -1 ? 'not-selected' : ''
+                const onDown = () => submitMarking(chainIndex, roundIndex, -1)
                 const onUp = () => submitMarking(chainIndex, roundIndex, 1)
 
                 return div(`marking_answer ${answer.user.color} ${marked}`, { key: roundIndex },
@@ -292,6 +301,40 @@ function App(props) {
             ))
         ),
         !finished && div('marking_finished', { onClick: onFinished }, 'Finished')
+      )
+    }
+
+    if (room.status === "finished") {
+      const scores = {};
+
+      // Calculate scores
+      room.chains.forEach((chain, chainIndex) => {
+        chain.forEach((answer, roundIndex) => {
+          const { sessionId } = answer.user;
+          let score = scores[sessionId] || 0;
+
+          for (const marking of room.markings) {
+            score += marking[chainIndex][roundIndex] || 0;
+          }
+
+          scores[sessionId] = score;
+        });
+      });
+
+      // Sort players
+      const players = room.players.slice(0);
+      players.sort((a, b) => scores[b.sessionId] - scores[a.sessionId]);
+
+      // prettier-ignore
+      return div('content finished', {},
+        div('finished_title', {}, 'Finished!'),
+        div('podium', {},
+          players.map(player =>
+            div('finished_player', { key: player.sessionId },
+              div(`finished_user-circle ${player.color}`, {},
+                div(`finished_user-icon`, {}, player.icon)),
+              div(`finished_score`, {}, scores[player.sessionId])))),
+        div('finished_return', { onClick: onReturnToLobby }, 'Return to Lobby')
       )
     }
   }

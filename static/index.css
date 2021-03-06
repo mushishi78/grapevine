@@ -196,6 +196,7 @@ body {
   font-size: 20px;
 }
 
+.finished_user-circle.red,
 .answer_user-circle.red,
 .user-circle.red,
 .player-circle.red {
@@ -203,6 +204,7 @@ body {
   box-shadow: 0 0 5px 0 hsl(0deg 80% 35%);
 }
 
+.finished_user-circle.blue,
 .answer_user-circle.blue,
 .user-circle.blue,
 .player-circle.blue {
@@ -210,6 +212,7 @@ body {
   box-shadow: 0 0 5px 0 hsl(240deg 80% 35%);
 }
 
+.finished_user-circle.green,
 .answer_user-circle.green,
 .user-circle.green,
 .player-circle.green {
@@ -217,6 +220,7 @@ body {
   box-shadow: 0 0 5px 0 hsl(120deg 80% 35%);
 }
 
+.finished_user-circle.magenta,
 .answer_user-circle.magenta,
 .user-circle.magenta,
 .player-circle.magenta {
@@ -224,6 +228,7 @@ body {
   box-shadow: 0 0 5px 0 hsl(300deg 80% 35%);
 }
 
+.finished_user-circle.cyan,
 .answer_user-circle.cyan,
 .user-circle.cyan,
 .player-circle.cyan {
@@ -231,6 +236,7 @@ body {
   box-shadow: 0 0 5px 0 hsl(180deg 80% 35%);
 }
 
+.finished_user-circle.yellow,
 .answer_user-circle.yellow,
 .user-circle.yellow,
 .player-circle.yellow {
@@ -250,7 +256,7 @@ body {
   box-sizing: border-box;
 }
 
-.content.loby {
+.content.lobby {
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -440,7 +446,7 @@ body {
 }
 
 .marking_explanation {
-  padding: 10px
+  padding: 10px;
 }
 
 .marking_chains {
@@ -563,4 +569,54 @@ body {
   margin: 5px;
   border-radius: 3px;
   text-align: center;
+}
+
+.content.finished {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.finished_title {
+  font-size: 35px;
+  text-align: center;
+}
+
+.podium {
+  margin-top: 10px;
+}
+
+.finished_player {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  margin: 5px 0;
+  background: #f9f9f9;
+  justify-content: space-evenly;
+}
+
+.finished_user-circle {
+  border-radius: 100%;
+  margin: 0 5px;
+  font-size: 30px;
+}
+
+.finished_user-icon {
+  padding: 4px 8px 1px 8px;
+}
+
+.finished_score {
+  font-size: 25px;
+}
+
+.finished_return {
+  padding: 25px;
+  background: #74c374;
+  color: white;
+  font-size: 25px;
+  cursor: pointer;
+  margin: 5px;
+  border-radius: 3px;
+  text-align: center;
+  margin-top: auto;
 }
