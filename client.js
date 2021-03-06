@@ -293,7 +293,6 @@ function Pad({ onNewPath, fabricObjects }) {
       isDrawingMode: onNewPath != null,
       width: padElem.clientWidth,
       height: padElem.clientHeight,
-      selection: false,
     });
 
     canvasRef.current.freeDrawingBrush.width = 3;
@@ -305,7 +304,12 @@ function Pad({ onNewPath, fabricObjects }) {
     window.addEventListener("resize", onResize);
 
     if (fabricObjects != null) {
+      fabricObjects.objects.forEach((o) => {
+        o.selectable = false;
+        o.hoverCursor = "auto";
+      });
       canvasRef.current.loadFromJSON(fabricObjects);
+      fitCanvasToObjects(canvasRef.current);
     }
 
     return () => {
@@ -320,6 +324,20 @@ function Pad({ onNewPath, fabricObjects }) {
       width: padElem.clientWidth,
       height: padElem.clientHeight,
     });
+  }
+
+  function fitCanvasToObjects(canvas) {
+    const objects = canvas.getObjects();
+    const objectsTop = getMin(objects.map((o) => o.top));
+    const objectsLeft = getMin(objects.map((o) => o.left));
+    const objectsRight = getMax(objects.map((o) => o.left + o.width));
+    const objectsBottom = getMax(objects.map((o) => o.top + o.height));
+    const scaleX = canvas.width / objectsRight;
+    const scaleY = canvas.height / objectsBottom;
+    const scale = Math.min(scaleX, scaleY);
+    const zoom = canvas.getZoom() * scale;
+    canvas.setViewportTransform([1, 0, 0, 1, objectsLeft, objectsTop]);
+    canvas.setViewportTransform([zoom, 0, 0, zoom, 0, 0]);
   }
 
   // prettier-ignore
@@ -446,4 +464,24 @@ function timeout(ms) {
 
 function not(b) {
   return !b;
+}
+
+function getMin(values) {
+  let min = values[0];
+
+  for (const value of values) {
+    if (value < min) min = value;
+  }
+
+  return min;
+}
+
+function getMax(values) {
+  let max = values[0];
+
+  for (const value of values) {
+    if (value > max) max = value;
+  }
+
+  return max;
 }
