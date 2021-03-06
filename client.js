@@ -102,6 +102,16 @@ function App(props) {
       console.log("Marking submitted");
       setRoom(room);
     });
+
+    socket.on("finished-submitted", (room) => {
+      console.log("Finish submitted");
+      setRoom(room);
+    });
+
+    socket.on("game-finished", (room) => {
+      console.log("Game finished");
+      setRoom(room);
+    });
   }, []);
 
   React.useEffect(() => {
@@ -141,6 +151,10 @@ function App(props) {
       roundIndex,
       value
     );
+  }
+
+  function onFinished() {
+    props.socket.emit("submit-finished", props.roomCode);
   }
 
   function content() {
@@ -240,10 +254,13 @@ function App(props) {
     }
 
     if (room.status === "marking") {
+      const finished = room.finished.indexOf(props.user.sessionId) > -1;
+
       // prettier-ignore
       return div('content marking', {},
         div('marking_title', {}, 'Marking'),
-        div('marking_chains', {},
+        finished && div('marking_explanation', {}, 'Waiting for other players to finish marking'),
+        !finished && div('marking_chains', {},
           room.chains.map((chain, chainIndex) =>
             div('marking_chain', { key: chainIndex },
               chain.map((answer, roundIndex) => {
@@ -273,7 +290,8 @@ function App(props) {
               }),
               div('marking_spacer')
             ))
-        )
+        ),
+        !finished && div('marking_finished', { onClick: onFinished }, 'Finished')
       )
     }
   }
@@ -330,9 +348,15 @@ function InputClue({ onConfirm }) {
     document.querySelector(".InputClue_input").focus();
   }, []);
 
+  function onKeyPress(event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      onConfirm(value);
+    }
+  }
+
   // prettier-ignore
   return div('InputClue', {},
-    textarea('InputClue_input', { value, rows: 2, onChange: (event) => setValue(event.target.value) }),
+    textarea('InputClue_input', { value, rows: 2, onChange: (event) => setValue(event.target.value), onKeyPress }),
     div('InputClue_confirm', { onClick: () => onConfirm(value) }, raw(checkmarkIcon)))
 }
 

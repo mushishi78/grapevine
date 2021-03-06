@@ -210,6 +210,7 @@ io.on("connection", (socket) => {
           room.players.length,
           room.players.length
         ),
+        finished: [],
       };
 
       rooms.set(roomCode, room);
@@ -276,6 +277,58 @@ io.on("connection", (socket) => {
       log("emit marking-submitted");
     }
   );
+
+  socket.on("submit-finished", async (roomCode) => {
+    const log = logger("[submit-finished]");
+
+    // Get the room
+    let room = rooms.get(roomCode);
+    if (room == null) return;
+
+    // Find the user
+    const user = room.users.find((u) => u.socketId === socket.id);
+
+    // If not a user, ignore
+    if (user == null) {
+      log("user not in room", roomCode, socket.id);
+      return;
+    }
+
+    // Find player
+    const playerIndex = Shared.getPlayerIndex(room, user.sessionId);
+    if (playerIndex == -1) {
+      log("user not in game", roomCode, user.sessionId);
+      return;
+    }
+
+    // If not in marking, ignore
+    if (room.status !== "marking") {
+      log("room no longer marking", room.status);
+      return;
+    }
+
+    // If already finished ignore
+    if (room.finished.indexOf(user.sessionId) > -1) {
+      log("already finished", roomCode, user.sessionId);
+      return;
+    }
+
+    // Add to finished array
+    const finished = room.finished.concat(user.sessionId);
+
+    // Update the room
+    room = { ...room, finished };
+    rooms.set(roomCode, room);
+    socket.emit("finished-submitted", room);
+    log("emit finished-submitted");
+
+    // If game finished
+    if (finished.length === room.players.length) {
+      room = { ...room, status: "finished" };
+      io.to(roomCode).emit("game-finished", room);
+      log("emit game-finished");
+    }
+  });
 });
 
 httpServer.listen(3000, () => {
