@@ -97,6 +97,11 @@ function App(props) {
       console.log("Marking started");
       setRoom(room);
     });
+
+    socket.on("marking-submitted", (room) => {
+      console.log("Marking submitted");
+      setRoom(room);
+    });
   }, []);
 
   React.useEffect(() => {
@@ -126,6 +131,16 @@ function App(props) {
 
   function onNewPath(newPath, canvasObject) {
     submitAnswer(canvasObject);
+  }
+
+  function submitMarking(chainIndex, roundIndex, value) {
+    props.socket.emit(
+      "submit-marking",
+      props.roomCode,
+      chainIndex,
+      roundIndex,
+      value
+    );
   }
 
   function content() {
@@ -231,21 +246,31 @@ function App(props) {
         div('marking_chains', {},
           room.chains.map((chain, chainIndex) =>
             div('marking_chain', { key: chainIndex },
-              chain.map((answer, roundIndex) =>
-                answer == null ? null :
-                  div(`marking_answer ${answer.user.color}`, { key: roundIndex },
-                    div(`answer_user-circle ${answer.user.color}`, {},
-                      div(`answer_user-icon`, {}, answer.user.icon)),
-                    roundIndex % 2 == 0
-                      ? div('answer_text', {}, answer.value)
-                      : div('answer_drawing', {},
-                        component(Pad, { fabricObjects: answer.value })),
+              chain.map((answer, roundIndex) => {
+                if (answer == null) return null;
 
-                    answer.user.sessionId === props.user.sessionId ? null :
-                      div('answer_buttons', {},
-                        div('answer_button down', {}, '👎'),
-                        div('answer_button up', {}, '👍'),
-                      ))),
+                const playerIndex = Shared.getPlayerIndex(room, props.user.sessionId);
+                const marking = room.markings[playerIndex][chainIndex][roundIndex];
+                const marked = marking != null ? 'marked' : ''
+                const downMarked = marking === 0 ? 'selected' : marking === 1 ? 'not-selected' : ''
+                const upMarked = marking === 1 ? 'selected' : marking === 0 ? 'not-selected' : ''
+                const onDown = () => submitMarking(chainIndex, roundIndex, 0)
+                const onUp = () => submitMarking(chainIndex, roundIndex, 1)
+
+                return div(`marking_answer ${answer.user.color} ${marked}`, { key: roundIndex },
+                  div(`answer_user-circle ${answer.user.color}`, {},
+                    div(`answer_user-icon`, {}, answer.user.icon)),
+                  roundIndex % 2 == 0
+                    ? div('answer_text', {}, answer.value)
+                    : div('answer_drawing', {},
+                      component(Pad, { fabricObjects: answer.value })),
+
+                  answer.user.sessionId === props.user.sessionId ? null :
+                    div('answer_buttons', {},
+                      div(`answer_button down ${downMarked}`, { onClick: onDown }, '👎'),
+                      div(`answer_button up ${upMarked}`, { onClick: onUp }, '👍'),
+                    ))
+              }),
               div('marking_spacer')
             ))
         )

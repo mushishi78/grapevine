@@ -126,7 +126,7 @@ io.on("connection", (socket) => {
       ...room,
       status: "playing",
       players,
-      chains: initializeMatrix(players.length, players.length),
+      chains: initialize2DMatrix(players.length, players.length),
       round: 0,
     };
     rooms.set(roomCode, room);
@@ -178,7 +178,12 @@ io.on("connection", (socket) => {
 
     // Set the answer in the matrix
     const chainIndex = Shared.getChainIndex(room, user.sessionId);
-    const chains = setMatrixValue(room.chains, chainIndex, room.round, answer);
+    const chains = set2DMatrixValue(
+      room.chains,
+      chainIndex,
+      room.round,
+      answer
+    );
 
     // Update the room
     room = { ...room, chains };
@@ -197,7 +202,16 @@ io.on("connection", (socket) => {
 
     // If the end of the game
     if (room.players.length === round) {
-      room = { ...room, status: "marking" };
+      room = {
+        ...room,
+        status: "marking",
+        markings: initialize3DMatrix(
+          room.players.length,
+          room.players.length,
+          room.players.length
+        ),
+      };
+
       rooms.set(roomCode, room);
       io.to(roomCode).emit("marking-started", room);
       log("emit marking-started");
@@ -214,6 +228,54 @@ io.on("connection", (socket) => {
     const interval = setInterval(tick, 1000, roomCode);
     intervals.set(roomCode, interval);
   });
+
+  socket.on(
+    "submit-marking",
+    async (roomCode, chainIndex, roundIndex, value) => {
+      const log = logger("[submit-marking]");
+
+      // Get the room
+      let room = rooms.get(roomCode);
+      if (room == null) return;
+
+      // Find the user
+      const user = room.users.find((u) => u.socketId === socket.id);
+
+      // If not a user, ignore
+      if (user == null) {
+        log("user not in room", roomCode, socket.id);
+        return;
+      }
+
+      // Find player
+      const playerIndex = Shared.getPlayerIndex(room, user.sessionId);
+      if (playerIndex == -1) {
+        log("user not in game", roomCode, user.sessionId);
+        return;
+      }
+
+      // If not in marking, ignore
+      if (room.status !== "marking") {
+        log("room no longer marking", room.status);
+        return;
+      }
+
+      // Update the markings
+      const markings = set3DMatrixValue(
+        room.markings,
+        playerIndex,
+        chainIndex,
+        roundIndex,
+        value
+      );
+
+      // Update the room
+      room = { ...room, markings };
+      rooms.set(roomCode, room);
+      socket.emit("marking-submitted", room);
+      log("emit marking-submitted");
+    }
+  );
 });
 
 httpServer.listen(3000, () => {
@@ -265,7 +327,16 @@ function tick(roomCode) {
   if (room.players.length === round) {
     clearInterval(interval);
     intervals.delete(roomCode);
-    room = { ...room, round, status: "marking" };
+    room = {
+      ...room,
+      round,
+      status: "marking",
+      markings: initialize3DMatrix(
+        room.players.length,
+        room.players.length,
+        room.players.length
+      ),
+    };
     rooms.set(roomCode, room);
     io.to(roomCode).emit("marking-started", room);
     log("emit marking-started", roomCode);
@@ -310,15 +381,29 @@ function cloneArray(array) {
   return array.slice(0);
 }
 
-function initializeMatrix(rows, columns) {
+function initialize2DMatrix(rows, columns) {
   return Array(rows)
     .fill(null)
     .map(() => Array(columns).fill(null));
 }
 
-function setMatrixValue(matrix, x, y, value) {
+function initialize3DMatrix(i, j, k) {
+  return Array(i)
+    .fill(null)
+    .map(() => initialize2DMatrix(j, k));
+}
+
+function set2DMatrixValue(matrix, x, y, value) {
   matrix = cloneArray(matrix);
   matrix[x] = cloneArray(matrix[x]);
   matrix[x][y] = value;
+  return matrix;
+}
+
+function set3DMatrixValue(matrix, x, y, z, value) {
+  matrix = cloneArray(matrix);
+  matrix[x] = cloneArray(matrix[x]);
+  matrix[x][y] = cloneArray(matrix[x][y]);
+  matrix[x][y][z] = value;
   return matrix;
 }
