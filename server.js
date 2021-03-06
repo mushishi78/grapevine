@@ -7,6 +7,10 @@ const Shared = require("./shared");
 const fileServer = new static.Server("./static", { cache: null });
 const indexHTML = fs.readFileSync(__dirname + "/static/index.html", "utf8");
 
+const coundownTicks = 3;
+const drawingTicks = 15;
+const verbose = true;
+
 const httpServer = http.createServer((request, response) => {
   request
     .addListener("end", () =>
@@ -97,8 +101,8 @@ io.on("connection", (socket) => {
     room = { ...room, status: "countdown" };
     rooms.set(roomCode, room);
 
-    // Countdown from 10
-    for (let i = 10; i > 0; i--) {
+    // Countdown
+    for (let i = coundownTicks; i > 0; i--) {
       // Refetch the room
       room = rooms.get(roomCode);
       if (room == null) return;
@@ -220,7 +224,7 @@ io.on("connection", (socket) => {
     }
 
     // Otherwise start drawing round
-    room = { ...room, round, ticks: 120 };
+    room = { ...room, round, ticks: drawingTicks };
     rooms.set(roomCode, room);
     io.to(roomCode).emit("new-drawing-round", room);
     log("emit new-drawing-round");
@@ -410,7 +414,7 @@ function tick(roomCode) {
 
 function logger(prefix) {
   return (...messages) => {
-    if (5 > 0) return;
+    if (!verbose) return;
     console.log(new Date(), prefix, ...messages);
   };
 }
