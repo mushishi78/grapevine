@@ -7,8 +7,8 @@ const Shared = require("./shared");
 const fileServer = new static.Server("./static", { cache: null });
 const indexHTML = fs.readFileSync(__dirname + "/static/index.html", "utf8");
 
-const coundownTicks = 3;
-const drawingTicks = 15;
+const coundownTicks = 5;
+const drawingTicks = 60;
 const verbose = true;
 
 const httpServer = http.createServer((request, response) => {
