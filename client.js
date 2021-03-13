@@ -195,6 +195,18 @@ function App(props) {
         div('countdown_cancel', { onClick: cancel }, 'Cancel'))
     }
 
+    if (
+      room.players.every((player) => player.sessionId !== props.user.sessionId)
+    ) {
+      // prettier-ignore
+      return div('content waiting-room', {},
+        div('waiting-room_title', {}, 'Game in progress'),
+        div('waiting-room_explanation', {}, `
+          There's currently a game in progress. Please wait until the game has finished
+          so that you can join the next one.
+        `))
+    }
+
     if (room.status === "playing" && room.round === 0) {
       const chainIndex = Shared.getChainIndex(room, props.user.sessionId);
       const answerSubmitted = room.chains[chainIndex][room.round] != null;

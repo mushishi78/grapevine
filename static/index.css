@@ -625,3 +625,17 @@ body {
   text-align: center;
   margin-top: auto;
 }
+
+.content.waiting-room {
+}
+
+.waiting-room_title {
+  font-size: 20px;
+  padding: 5px 10px 0;
+}
+
+.waiting-room_explanation {
+  padding: 10px;
+  font-size: 14px;
+  max-width: 50ch;
+}
