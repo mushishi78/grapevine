@@ -371,6 +371,11 @@ body {
   margin-left: 5px;
 }
 
+.InputClue_confirm.disabled {
+  cursor: auto;
+  background: #ccc;
+}
+
 .content.drawing {
   display: flex;
   flex-direction: column;

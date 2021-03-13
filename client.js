@@ -397,10 +397,13 @@ function InputClue({ onConfirm }) {
     }
   }
 
+  const disabled = value === "";
+  const disabledClass = disabled ? "disabled" : "";
+
   // prettier-ignore
   return div('InputClue', {},
     textarea('InputClue_input', { value, rows: 2, onChange: (event) => setValue(event.target.value), onKeyPress }),
-    div('InputClue_confirm', { onClick: () => onConfirm(value) }, raw(checkmarkIcon)))
+    div(`InputClue_confirm ${disabledClass}`, { onClick: disabled ? null : () => onConfirm(value) }, raw(checkmarkIcon)))
 }
 
 function Pad({ onNewPath, fabricObjects }) {
