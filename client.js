@@ -34,6 +34,7 @@ function App(props) {
   const [copied, setCopied] = React.useState(false);
   const [newRoomCode, setNewRoomCode] = React.useState("");
   const [showNewRoomCode, setShowNewRoomCode] = React.useState(false);
+  const [brushColor, setBrushColor] = React.useState("black");
 
   React.useEffect(() => {
     const { socket } = props;
@@ -247,7 +248,9 @@ function App(props) {
             div('drawing_count_label', {}, "Count"),
             div('drawing_count_value', {}, room.ticks))
         ),
-        component(Pad, { onNewPath, fabricObjects }))
+        component(Pad, { onNewPath, fabricObjects, brushColor }),
+        div('row', {},
+          component(ColorPicker, { brushColor, setBrushColor })))
     }
 
     if (room.status === "playing" && room.round % 2 === 0) {
@@ -418,7 +421,7 @@ function InputClue({ onConfirm }) {
     div(`InputClue_confirm ${disabledClass}`, { onClick: disabled ? null : () => onConfirm(value) }, raw(checkmarkIcon)))
 }
 
-function Pad({ onNewPath, fabricObjects }) {
+function Pad({ onNewPath, fabricObjects, brushColor }) {
   const padRef = React.useRef();
   const canvasRef = React.useRef();
 
@@ -432,6 +435,7 @@ function Pad({ onNewPath, fabricObjects }) {
     });
 
     canvasRef.current.freeDrawingBrush.width = 3;
+    canvasRef.current.freeDrawingBrush.color = brushColor || "Black";
 
     canvasRef.current.on("path:created", ({ path }) => {
       onNewPath(path.toObject(), canvasRef.current.toObject());
@@ -452,6 +456,10 @@ function Pad({ onNewPath, fabricObjects }) {
       window.removeEventListener("resize", onResize);
     };
   }, []);
+
+  React.useEffect(() => {
+    canvasRef.current.freeDrawingBrush.color = brushColor;
+  }, [brushColor]);
 
   function onResize() {
     const padElem = document.querySelector(".Pad");
@@ -479,6 +487,36 @@ function Pad({ onNewPath, fabricObjects }) {
   // prettier-ignore
   return div("Pad", { ref: padRef },
     canvas("Pad_canvas"));
+}
+
+const colors = [
+  "black",
+  "white",
+  "red",
+  "orange",
+  "yellow",
+  "green",
+  "blue",
+  "indigo",
+  "violet",
+];
+
+function ColorPicker({ brushColor, setBrushColor }) {
+  const [show, setShow] = React.useState(false);
+
+  // prettier-ignore
+  return div('ColorPicker', { tabIndex: -1, onBlur: () => setShow(false) },
+    div('ColorPicker_current', {
+      style: { background: brushColor },
+      onClick: () => setShow(!show)
+    }),
+    show && div('ColorPicker_menu', {},
+      colors.map(color =>
+        div('ColorPicker_menuOption', {
+          key: color,
+          style: { background: color },
+          onClick: () => setBrushColor(color)
+        }))))
 }
 
 //

@@ -639,3 +639,32 @@ body {
   font-size: 14px;
   max-width: 50ch;
 }
+
+.ColorPicker {
+  position: relative;
+  background: #eee;
+  margin: 5px 0;
+  border: 1px solid #aaa;
+  outline: none;
+}
+.ColorPicker_current {
+  cursor: pointer;
+  padding: 15px;
+  margin: 5px;
+  border-radius: 3px;
+  border: 1px solid #333;
+}
+.ColorPicker_menu {
+  position: absolute;
+  background: #ddd;
+  bottom: 40px;
+  left: -1;
+  border: 1px solid #aaa;
+}
+.ColorPicker_menuOption {
+  cursor: pointer;
+  padding: 15px;
+  margin: 5px;
+  border-radius: 3px;
+  border: 1px solid #333;
+}
