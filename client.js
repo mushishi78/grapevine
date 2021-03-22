@@ -142,6 +142,7 @@ function App(props) {
   }
 
   function submitAnswer(answerValue) {
+    if (answerValue == null) return;
     props.socket.emit("submit-answer", props.roomCode, answerValue);
   }
 
@@ -401,24 +402,31 @@ function App(props) {
 
 function InputClue({ onConfirm }) {
   const [value, setValue] = React.useState("");
+  const [confirming, setConfirming] = React.useState(false);
+
+  const disabled = value == null || value === "" || confirming;
+  const disabledClass = disabled ? "disabled" : "";
 
   React.useEffect(() => {
     document.querySelector(".InputClue_input").focus();
   }, []);
 
-  function onKeyPress(event) {
-    if (event.key === "Enter" && !event.shiftKey) {
-      onConfirm(value);
-    }
+  function confirm() {
+    if (disabled) return;
+    setConfirming(true);
+    onConfirm(value);
   }
 
-  const disabled = value === "";
-  const disabledClass = disabled ? "disabled" : "";
+  function onKeyPress(event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      confirm();
+    }
+  }
 
   // prettier-ignore
   return div('InputClue', {},
     textarea('InputClue_input', { value, rows: 2, onChange: (event) => setValue(event.target.value), onKeyPress }),
-    div(`InputClue_confirm ${disabledClass}`, { onClick: disabled ? null : () => onConfirm(value) }, raw(checkmarkIcon)))
+    div(`InputClue_confirm ${disabledClass}`, { onClick: confirm }, raw(checkmarkIcon)))
 }
 
 function Pad({ onNewPath, fabricObjects, brushColor }) {
