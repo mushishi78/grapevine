@@ -143,7 +143,7 @@ function App(props) {
 
   function submitAnswer(answerValue) {
     if (answerValue == null) return;
-    props.socket.emit("submit-answer", props.roomCode, answerValue);
+    props.socket.emit("submit-answer", props.roomCode, room.round, answerValue);
   }
 
   function onNewPath(newPath, canvasObject) {

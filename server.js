@@ -157,7 +157,7 @@ io.on("connection", (socket) => {
     io.to(roomCode).emit("cancelled", room);
   });
 
-  socket.on("submit-answer", async (roomCode, answerValue) => {
+  socket.on("submit-answer", async (roomCode, roomRound, answerValue) => {
     const log = logger("[submit-answer]");
 
     // Get the room
@@ -177,6 +177,12 @@ io.on("connection", (socket) => {
     // If not in playing, ignore
     if (room.status !== "playing") {
       log("room no longer in play", room.status);
+      return;
+    }
+
+    // If room round has changed, ignore
+    if (room.round !== roomRound) {
+      log("round has finished");
       return;
     }
 
