@@ -1,5 +1,6 @@
 const Shared = require("../shared");
 const { Pad } = require("./Pad");
+const { InputClue } = require("./InputClue");
 const { component, div } = require("./react");
 
 module.exports = {

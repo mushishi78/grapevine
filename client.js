@@ -2,7 +2,6 @@ const io = require("socket.io-client");
 const React = require("react");
 const ReactDom = require("react-dom");
 const uuid = require("uuid");
-const copyToClipboard = require("copy-to-clipboard");
 const { Lobby } = require("./src/Lobby");
 const { Countdown } = require("./src/Countdown");
 const { WaitingRoom } = require("./src/WaitingRoom");
@@ -10,10 +9,9 @@ const { InitialClue } = require("./src/InitialClue");
 const { DrawingRound } = require("./src/DrawingRound");
 const { GuessingRound } = require("./src/GuessingRound");
 const { MarkingRound } = require("./src/MarkingRound");
-const { component, div, a, input, raw } = require("./src/react");
-
-const editIcon = require("/eva-icons/fill/svg/edit.svg");
-const copyIcon = require("/eva-icons/fill/svg/copy.svg");
+const { Finished } = require("./src/Finished");
+const { Page } = require("./src/Page");
+const { component, div } = require("./src/react");
 
 window.addEventListener("load", () => {
   const roomCode = getRoomCode();
@@ -36,9 +34,6 @@ window.addEventListener("load", () => {
 
 function App(props) {
   const [room, setRoom] = React.useState({ status: "connecting" });
-  const [copied, setCopied] = React.useState(false);
-  const [newRoomCode, setNewRoomCode] = React.useState("");
-  const [showNewRoomCode, setShowNewRoomCode] = React.useState(false);
 
   React.useEffect(() => {
     const { socket } = props;
@@ -124,19 +119,6 @@ function App(props) {
     });
   }, []);
 
-  React.useEffect(() => {
-    if (!showNewRoomCode) return;
-    document.querySelector(".edit-room-input").focus();
-  }, [showNewRoomCode]);
-
-  async function copy() {
-    if (copied) return;
-    copyToClipboard(location.href);
-    setCopied(true);
-    await timeout(1000);
-    setCopied(false);
-  }
-
   function start() {
     props.socket.emit("start", props.roomCode);
   }
@@ -207,7 +189,7 @@ function App(props) {
     }
 
     if (room.status === "finished") {
-      return component(FinishedRound, { room, onReturnToLobby });
+      return component(Finished, { room, onReturnToLobby });
     }
   }
 
@@ -217,43 +199,7 @@ function App(props) {
       div('full-page-message', {}, 'Connecting....'));
   }
 
-  // prettier-ignore
-  return div('page', {},
-    div('row', {},
-      div('room-code', {},
-        div('room-label', {}, 'Room'),
-        div('room-row', {},
-          div('room-code-value', {}, room.roomCode),
-          div('room-button edit', { onClick: () => setShowNewRoomCode(not) }, raw(editIcon)))),
-      div('room-link', {},
-        div('room-label', {}, 'Link'),
-        div('room-row', {},
-          a('room-link-value', location.href, {}, location.href),
-          div('room-button copy', { onClick: () => copy() }, raw(copyIcon)),
-          div(`room-link-copied ${copied}`, {},
-            'Copied!'))),
-    ),
-    div(`edit-room-row ${showNewRoomCode}`, {},
-      div('edit-room-title', {}, 'Enter Room'),
-      input('edit-room-input', 'text', { value: newRoomCode, onChange: event => setNewRoomCode(event.target.value) }),
-      div('edit-room-buttons', {},
-        div('edit-room-button secondary', { onClick: () => setShowNewRoomCode(false) }, 'Cancel'),
-        a('edit-room-button primary', `${location.origin}/${newRoomCode}`, {}, 'Go'))
-    ),
-    div('row', {},
-      div('user', {},
-        div('user-label', {}, 'You'),
-        div(`user-circle ${props.user.color}`, {},
-          div(`user-icon`, {}, props.user.icon))),
-      div('players', {},
-        div('players-label', {}, 'Players'),
-        div('players-row', {},
-          room.users.map(player =>
-            div(`player-circle ${player.color}`, { key: player.socketId },
-              div('player-icon', {}, player.icon)))))
-    ),
-    content()
-  )
+  return component(Page, { room, user: props.user }, content());
 }
 
 //
@@ -322,12 +268,4 @@ function buildArray(length, fn) {
   return Array(length)
     .fill(null)
     .map((_, index) => fn(index));
-}
-
-function timeout(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function not(b) {
-  return !b;
 }

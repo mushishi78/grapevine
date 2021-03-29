@@ -1,10 +1,10 @@
 const { div } = require("./react");
 
 module.exports = {
-  FinishedRound,
+  Finished,
 };
 
-function FinishedRound({ room, onReturnToLobby }) {
+function Finished({ room, onReturnToLobby }) {
   const scores = {};
 
   // Calculate scores
