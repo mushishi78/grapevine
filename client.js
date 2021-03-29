@@ -5,10 +5,22 @@ const uuid = require("uuid");
 const copyToClipboard = require("copy-to-clipboard");
 const { fabric } = require("fabric");
 const Shared = require("./shared");
+const { InputClue } = require("./src/InputClue");
+
+const {
+  component,
+  div,
+  a,
+  img,
+  input,
+  textarea,
+  raw,
+  bold,
+  canvas,
+} = require("./src/react");
 
 const editIcon = require("/eva-icons/fill/svg/edit.svg");
 const copyIcon = require("/eva-icons/fill/svg/copy.svg");
-const checkmarkIcon = require("/eva-icons/fill/svg/checkmark.svg");
 
 window.addEventListener("load", () => {
   const roomCode = getRoomCode();
@@ -400,36 +412,7 @@ function App(props) {
   )
 }
 
-function InputClue({ onConfirm }) {
-  const [value, setValue] = React.useState("");
-  const [confirming, setConfirming] = React.useState(false);
-
-  const disabled = value == null || value === "" || confirming;
-  const disabledClass = disabled ? "disabled" : "";
-
-  React.useEffect(() => {
-    document.querySelector(".InputClue_input").focus();
-  }, []);
-
-  function confirm() {
-    if (disabled) return;
-    setConfirming(true);
-    onConfirm(value);
-  }
-
-  function onKeyPress(event) {
-    if (event.key === "Enter" && !event.shiftKey) {
-      confirm();
-    }
-  }
-
-  // prettier-ignore
-  return div('InputClue', {},
-    textarea('InputClue_input', { value, rows: 2, onChange: (event) => setValue(event.target.value), onKeyPress }),
-    div(`InputClue_confirm ${disabledClass}`, { onClick: confirm }, raw(checkmarkIcon)))
-}
-
-function Pad({ onNewPath, fabricObjects, brushColor }) {
+function Pad({ onNewPath, fabricObjects }) {
   const padRef = React.useRef();
   const canvasRef = React.useRef();
 
@@ -525,51 +508,6 @@ function ColorPicker({ brushColor, setBrushColor }) {
           style: { background: color },
           onClick: () => setBrushColor(color)
         }))))
-}
-
-//
-// React helpers
-
-function component(component, ...children) {
-  return React.createElement(component, ...children);
-}
-
-function div(className, props, ...children) {
-  return React.createElement("div", { className, ...props }, ...children);
-}
-
-function a(className, href, props, ...children) {
-  return React.createElement("a", { className, href, ...props }, ...children);
-}
-
-function img(className, src, props, ...children) {
-  return React.createElement("img", { className, src, ...props }, ...children);
-}
-
-function input(className, type, props, ...children) {
-  return React.createElement(
-    "input",
-    { className, type, ...props },
-    ...children
-  );
-}
-
-function textarea(className, props, ...children) {
-  return React.createElement("textarea", { className, ...props }, ...children);
-}
-
-function raw(html) {
-  return React.createElement("div", {
-    dangerouslySetInnerHTML: { __html: html },
-  });
-}
-
-function bold(...children) {
-  return React.createElement("b", {}, ...children);
-}
-
-function canvas(className, props, ...children) {
-  return React.createElement("canvas", { className, ...props }, ...children);
 }
 
 //
