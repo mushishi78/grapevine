@@ -3,13 +3,14 @@ const React = require("react");
 const ReactDom = require("react-dom");
 const uuid = require("uuid");
 const copyToClipboard = require("copy-to-clipboard");
-const { fabric } = require("fabric");
-const Shared = require("./shared");
-const { InputClue } = require("./src/InputClue");
-const { Pad } = require("./src/Pad");
 const { Lobby } = require("./src/Lobby");
 const { Countdown } = require("./src/Countdown");
-const { component, div, a, input, raw, bold } = require("./src/react");
+const { WaitingRoom } = require("./src/WaitingRoom");
+const { InitialClue } = require("./src/InitialClue");
+const { DrawingRound } = require("./src/DrawingRound");
+const { GuessingRound } = require("./src/GuessingRound");
+const { MarkingRound } = require("./src/MarkingRound");
+const { component, div, a, input, raw } = require("./src/react");
 
 const editIcon = require("/eva-icons/fill/svg/edit.svg");
 const copyIcon = require("/eva-icons/fill/svg/copy.svg");
@@ -38,7 +39,6 @@ function App(props) {
   const [copied, setCopied] = React.useState(false);
   const [newRoomCode, setNewRoomCode] = React.useState("");
   const [showNewRoomCode, setShowNewRoomCode] = React.useState(false);
-  const [brushColor, setBrushColor] = React.useState("black");
 
   React.useEffect(() => {
     const { socket } = props;
@@ -182,158 +182,32 @@ function App(props) {
     if (
       room.players.every((player) => player.sessionId !== props.user.sessionId)
     ) {
-      // prettier-ignore
-      return div('content waiting-room', {},
-        div('waiting-room_title', {}, 'Game in progress'),
-        div('waiting-room_explanation', {}, `
-          There's currently a game in progress. Please wait until the game has finished
-          so that you can join the next one.
-        `))
+      return component(WaitingRoom, {});
     }
 
     if (room.status === "playing" && room.round === 0) {
-      const chainIndex = Shared.getChainIndex(room, props.user.sessionId);
-      const answerSubmitted = room.chains[chainIndex][room.round] != null;
-
-      if (answerSubmitted) {
-        // prettier-ignore
-        return div('content initial-clue', {},
-          div('initial-clue_title', {}, 'Initial Clue'),
-          div('initial-clue_explanation', {}, `
-            Clue submitted waiting for other players
-          `))
-      }
-
-      // prettier-ignore
-      return div('content initial-clue', {},
-        div('initial-clue_title', {}, 'Initial Clue'),
-        div('initial-clue_explanation', {}, `
-          Please think of an initial clue to start the game.
-          Your fellow team mate will be asked to draw it, so think hard!
-        `),
-        component(InputClue, { onConfirm: submitAnswer }))
+      return component(InitialClue, { room, user: props.user, submitAnswer });
     }
 
     if (room.status === "playing" && room.round % 2 === 1) {
-      const chainIndex = Shared.getChainIndex(room, props.user.sessionId);
-      const chain = room.chains[chainIndex];
-      const previousAnswer = chain[room.round - 1];
-      const currentAnswer = chain[room.round];
-      const fabricObjects = currentAnswer != null ? currentAnswer.value : null;
-
-      // prettier-ignore
-      return div('content drawing', {},
-        div('row clue_and_count', {},
-          div('drawing_clue', {},
-            div('drawing_clue_label', {}, "Clue"),
-            div('drawing_clue_value', {}, previousAnswer.value)),
-          div('drawing_count', {},
-            div('drawing_count_label', {}, "Count"),
-            div('drawing_count_value', {}, room.ticks))
-        ),
-        component(Pad, { onNewPath, fabricObjects, brushColor }),
-        div('row', {},
-          component(ColorPicker, { brushColor, setBrushColor })))
+      return component(DrawingRound, { room, user: props.user, onNewPath });
     }
 
     if (room.status === "playing" && room.round % 2 === 0) {
-      const chainIndex = Shared.getChainIndex(room, props.user.sessionId);
-      const chain = room.chains[chainIndex];
-      const previousAnswer = chain[room.round - 1];
-      const answerSubmitted = chain[room.round] != null;
-      const fabricObjects =
-        previousAnswer != null ? previousAnswer.value : null;
-
-      if (answerSubmitted) {
-        // prettier-ignore
-        return div('content guess', {},
-          div('guess_title', {}, 'Guess'),
-          div('guess_explanation', {}, `
-            Guess submitted waiting for other players
-          `))
-      }
-
-      // prettier-ignore
-      return div('content guess', {},
-        component(Pad, { fabricObjects }),
-        div('guess_title', {}, 'Guess'),
-        component(InputClue, { onConfirm: submitAnswer }))
+      return component(GuessingRound, { room, user: props.user, submitAnswer });
     }
 
     if (room.status === "marking") {
-      const finished = room.finished.indexOf(props.user.sessionId) > -1;
-
-      // prettier-ignore
-      return div('content marking', {},
-        div('marking_title', {}, 'Marking'),
-        finished && div('marking_explanation', {}, 'Waiting for other players to finish marking'),
-        !finished && div('marking_chains', {},
-          room.chains.map((chain, chainIndex) =>
-            div('marking_chain', { key: chainIndex },
-              chain.map((answer, roundIndex) => {
-                if (answer == null) return null;
-
-                const playerIndex = Shared.getPlayerIndex(room, props.user.sessionId);
-                const marking = room.markings[playerIndex][chainIndex][roundIndex];
-                const marked = marking != null ? 'marked' : ''
-                const downMarked = marking === -1 ? 'selected' : marking === 1 ? 'not-selected' : ''
-                const upMarked = marking === 1 ? 'selected' : marking === -1 ? 'not-selected' : ''
-                const onDown = () => submitMarking(chainIndex, roundIndex, -1)
-                const onUp = () => submitMarking(chainIndex, roundIndex, 1)
-
-                return div(`marking_answer ${answer.user.color} ${marked}`, { key: roundIndex },
-                  div(`answer_user-circle ${answer.user.color}`, {},
-                    div(`answer_user-icon`, {}, answer.user.icon)),
-                  roundIndex % 2 == 0
-                    ? div('answer_text', {}, answer.value)
-                    : div('answer_drawing', {},
-                      component(Pad, { fabricObjects: answer.value })),
-
-                  answer.user.sessionId === props.user.sessionId ? null :
-                    div('answer_buttons', {},
-                      div(`answer_button down ${downMarked}`, { onClick: onDown }, '👎'),
-                      div(`answer_button up ${upMarked}`, { onClick: onUp }, '👍'),
-                    ))
-              }),
-              div('marking_spacer')
-            ))
-        ),
-        !finished && div('marking_finished', { onClick: onFinished }, 'Finished')
-      )
+      return component(MarkingRound, {
+        room,
+        user: props.user,
+        submitMarking,
+        onFinished,
+      });
     }
 
     if (room.status === "finished") {
-      const scores = {};
-
-      // Calculate scores
-      room.chains.forEach((chain, chainIndex) => {
-        chain.forEach((answer, roundIndex) => {
-          const { sessionId } = answer.user;
-          let score = scores[sessionId] || 0;
-
-          for (const marking of room.markings) {
-            score += marking[chainIndex][roundIndex] || 0;
-          }
-
-          scores[sessionId] = score;
-        });
-      });
-
-      // Sort players
-      const players = room.players.slice(0);
-      players.sort((a, b) => scores[b.sessionId] - scores[a.sessionId]);
-
-      // prettier-ignore
-      return div('content finished', {},
-        div('finished_title', {}, 'Finished!'),
-        div('podium', {},
-          players.map(player =>
-            div('finished_player', { key: player.sessionId },
-              div(`finished_user-circle ${player.color}`, {},
-                div(`finished_user-icon`, {}, player.icon)),
-              div(`finished_score`, {}, scores[player.sessionId])))),
-        div('finished_return', { onClick: onReturnToLobby }, 'Return to Lobby')
-      )
+      return component(FinishedRound, { room, onReturnToLobby });
     }
   }
 
@@ -380,36 +254,6 @@ function App(props) {
     ),
     content()
   )
-}
-
-const colors = [
-  "black",
-  "white",
-  "red",
-  "orange",
-  "yellow",
-  "green",
-  "blue",
-  "indigo",
-  "violet",
-];
-
-function ColorPicker({ brushColor, setBrushColor }) {
-  const [show, setShow] = React.useState(false);
-
-  // prettier-ignore
-  return div('ColorPicker', { tabIndex: -1, onBlur: () => setShow(false) },
-    div('ColorPicker_current', {
-      style: { background: brushColor },
-      onClick: () => setShow(!show)
-    }),
-    show && div('ColorPicker_menu', {},
-      colors.map(color =>
-        div('ColorPicker_menuOption', {
-          key: color,
-          style: { background: color },
-          onClick: () => setBrushColor(color)
-        }))))
 }
 
 //
