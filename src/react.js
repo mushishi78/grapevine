@@ -12,8 +12,8 @@ module.exports = {
   canvas,
 };
 
-function component(component, ...children) {
-  return React.createElement(component, ...children);
+function component(component, props, ...children) {
+  return React.createElement(component, props, ...children);
 }
 
 function div(className, props, ...children) {

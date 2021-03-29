@@ -7,6 +7,7 @@ const { fabric } = require("fabric");
 const Shared = require("./shared");
 const { InputClue } = require("./src/InputClue");
 const { Pad } = require("./src/Pad");
+const { Lobby } = require("./src/Lobby");
 const { component, div, a, input, raw, bold } = require("./src/react");
 
 const editIcon = require("/eva-icons/fill/svg/edit.svg");
@@ -171,25 +172,7 @@ function App(props) {
   }
 
   function content() {
-    if (room.status === "lobby") {
-      const playerMin = 3;
-      const canStart = room.users.length >= playerMin;
-
-      // prettier-ignore
-      return div('content lobby', {},
-        div('game_title', {}, 'Grapevine'),
-        div('game-explanation', {}, `
-          A drawing guessing game where players must try to draw a clue, then
-          the next player tries to guess the clue and the next player tries
-          to draw their guess and so on. See how far away from the original
-          clue the chain of guesses gets and hilarity ensues.
-        `),
-        canStart && (
-          div('start-button', { onClick: start }, 'Start')),
-        !canStart && (
-          div('waiting', {}, 'Need at least ', bold(playerMin), ' players to Start')
-        ))
-    }
+    if (room.status === "lobby") return component(Lobby, { room, start });
 
     if (room.status === "countdown") {
       // prettier-ignore
