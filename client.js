@@ -8,6 +8,7 @@ const Shared = require("./shared");
 const { InputClue } = require("./src/InputClue");
 const { Pad } = require("./src/Pad");
 const { Lobby } = require("./src/Lobby");
+const { Countdown } = require("./src/Countdown");
 const { component, div, a, input, raw, bold } = require("./src/react");
 
 const editIcon = require("/eva-icons/fill/svg/edit.svg");
@@ -175,11 +176,7 @@ function App(props) {
     if (room.status === "lobby") return component(Lobby, { room, start });
 
     if (room.status === "countdown") {
-      // prettier-ignore
-      return div('content countdown', {},
-        div('countdown_explanation', {}, 'Game starting in'),
-        div('countdown_count', {}, room.count),
-        div('countdown_cancel', { onClick: cancel }, 'Cancel'))
+      return component(Countdown, { room, cancel });
     }
 
     if (
