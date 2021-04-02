@@ -5,6 +5,14 @@ body {
   color: #333;
 }
 
+button {
+  background: none;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  box-sizing: content-box;
+}
+
 .full-page {
   height: 100%;
   padding: 10px;
@@ -241,8 +249,7 @@ body {
 }
 
 .InputClue_confirm {
-  min-width: 25px;
-  padding: 14px;
+  padding: 5px;
   cursor: pointer;
   background: #74c374;
   border-radius: 4px;
@@ -253,6 +260,10 @@ body {
 .InputClue_confirm.disabled {
   cursor: auto;
   background: #ccc;
+}
+
+.InputClue_confirm svg {
+  width: 50px;
 }
 
 .content.drawing {

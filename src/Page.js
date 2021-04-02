@@ -1,6 +1,6 @@
 const React = require("react");
 const copyToClipboard = require("copy-to-clipboard");
-const { div, a, input, raw } = require("./react");
+const { div, button, raw } = require("./react");
 const { timeout } = require("./timeout");
 const { not } = require("./boolean");
 
@@ -30,7 +30,7 @@ function Page({ room, user, children }) {
       div(`user-circle ${user.color}`, {},
         div(`user-icon`, {}, user.icon)),
       div('game_title', {}, 'Grapevine'),
-      div('menu-button', { onClick: () => setShowMenu(not) },
+      button('menu-button', () => setShowMenu(not), {},
         raw(menuIcon))
     ),
     div('players-row', {},

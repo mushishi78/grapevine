@@ -1,5 +1,5 @@
 const React = require("react");
-const { div, textarea, raw } = require("./react");
+const { div, textarea, raw, button } = require("./react");
 
 const checkmarkIcon = require("../eva-icons/fill/svg/checkmark.svg");
 
@@ -33,5 +33,5 @@ function InputClue({ onConfirm }) {
   // prettier-ignore
   return div('InputClue', {},
     textarea('InputClue_input', { value, rows: 2, onChange: (event) => setValue(event.target.value), onKeyPress }),
-    div(`InputClue_confirm ${disabledClass}`, { onClick: confirm }, raw(checkmarkIcon)))
+    button(`InputClue_confirm ${disabledClass}`, confirm, {}, raw(checkmarkIcon)))
 }

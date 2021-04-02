@@ -1,4 +1,4 @@
-const { div } = require("./react");
+const { div, button } = require("./react");
 
 module.exports = {
   Finished,
@@ -34,6 +34,6 @@ function Finished({ room, onReturnToLobby }) {
           div(`finished_user-circle ${player.color}`, {},
             div(`finished_user-icon`, {}, player.icon)),
           div(`finished_score`, {}, scores[player.sessionId])))),
-    div('finished_return', { onClick: onReturnToLobby }, 'Return to Lobby')
+    button('finished_return', onReturnToLobby, {}, 'Return to Lobby')
   )
 }

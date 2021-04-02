@@ -1,4 +1,4 @@
-const { div, bold } = require("./react");
+const { div, bold, button } = require("./react");
 
 module.exports = {
   Lobby,
@@ -17,7 +17,7 @@ function Lobby({ room, start }) {
       clue the chain of guesses gets and hilarity ensues.
     `),
     canStart && (
-      div('start-button', { onClick: start }, 'Start')),
+      button('start-button', start, {}, 'Start')),
     !canStart && (
       div('waiting', {}, 'Need at least ', bold(playerMin), ' players to Start')
     ))

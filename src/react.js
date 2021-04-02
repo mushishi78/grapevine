@@ -4,6 +4,7 @@ module.exports = {
   component,
   div,
   a,
+  button,
   img,
   input,
   textarea,
@@ -18,6 +19,14 @@ function component(component, props, ...children) {
 
 function div(className, props, ...children) {
   return React.createElement("div", { className, ...props }, ...children);
+}
+
+function button(className, onClick, props, ...children) {
+  return React.createElement(
+    "button",
+    { className, onClick, ...props },
+    ...children
+  );
 }
 
 function a(className, href, props, ...children) {

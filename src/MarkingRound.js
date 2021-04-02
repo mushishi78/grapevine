@@ -1,6 +1,6 @@
 const Shared = require("../shared");
 const { Pad } = require("./Pad");
-const { component, div } = require("./react");
+const { component, div, button } = require("./react");
 
 module.exports = {
   MarkingRound,
@@ -36,14 +36,14 @@ function MarkingRound({ room, user, submitMarking, onFinished }) {
 
               answer.user.sessionId === user.sessionId || finished ? null :
                 div('answer_buttons', {},
-                  div(`answer_button down ${downMarked}`, { onClick: onDown }, '👎'),
-                  div(`answer_button up ${upMarked}`, { onClick: onUp }, '👍'),
+                  button(`answer_button down ${downMarked}`, onDown, {}, '👎'),
+                  button(`answer_button up ${upMarked}`, onUp, {}, '👍'),
                 ))
           }),
           div('marking_spacer')
         ))
     ),
-    !finished && div('marking_finished', { onClick: onFinished }, 'Finished'),
+    !finished && button('marking_finished', onFinished, {}, 'Finished'),
     finished && div('marking_explanation', {}, 'Waiting for other players to finish marking'),
   )
 }
