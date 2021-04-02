@@ -12,8 +12,7 @@ function MarkingRound({ room, user, submitMarking, onFinished }) {
   // prettier-ignore
   return div('content marking', {},
     div('marking_title', {}, 'Marking'),
-    finished && div('marking_explanation', {}, 'Waiting for other players to finish marking'),
-    !finished && div('marking_chains', {},
+    div('marking_chains', {},
       room.chains.map((chain, chainIndex) =>
         div('marking_chain', { key: chainIndex },
           chain.map((answer, roundIndex) => {
@@ -35,7 +34,7 @@ function MarkingRound({ room, user, submitMarking, onFinished }) {
                 : div('answer_drawing', {},
                   component(Pad, { fabricObjects: answer.value })),
 
-              answer.user.sessionId === user.sessionId ? null :
+              answer.user.sessionId === user.sessionId || finished ? null :
                 div('answer_buttons', {},
                   div(`answer_button down ${downMarked}`, { onClick: onDown }, '👎'),
                   div(`answer_button up ${upMarked}`, { onClick: onUp }, '👍'),
@@ -44,6 +43,7 @@ function MarkingRound({ room, user, submitMarking, onFinished }) {
           div('marking_spacer')
         ))
     ),
-    !finished && div('marking_finished', { onClick: onFinished }, 'Finished')
+    !finished && div('marking_finished', { onClick: onFinished }, 'Finished'),
+    finished && div('marking_explanation', {}, 'Waiting for other players to finish marking'),
   )
 }

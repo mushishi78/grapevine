@@ -66,6 +66,7 @@ body {
   overflow-x: auto;
   padding: 5px;
   background: #effbef;
+  flex-shrink: 0;
 }
 
 .player-circle {
@@ -329,12 +330,16 @@ body {
 }
 
 .marking_title {
-  font-size: 20px;
-  padding: 5px 10px 0;
+  font-size: 30px;
+  padding: 15px;
 }
 
 .marking_explanation {
-  padding: 10px;
+  padding: 15px;
+  font-size: 17px;
+  background: #ddd;
+  margin-top: auto;
+  text-align: center;
 }
 
 .marking_chains {
@@ -449,13 +454,11 @@ body {
 }
 
 .marking_finished {
-  padding: 25px;
+  padding: 15px;
   background: #74c374;
   color: white;
-  font-size: 25px;
+  font-size: 35px;
   cursor: pointer;
-  margin: 5px;
-  border-radius: 3px;
   text-align: center;
 }
 
@@ -465,8 +468,9 @@ body {
 }
 
 .finished_title {
-  font-size: 35px;
+  font-size: 30px;
   text-align: center;
+  padding-top: 15px;
 }
 
 .podium {
@@ -497,13 +501,11 @@ body {
 }
 
 .finished_return {
-  padding: 25px;
+  padding: 21.5px;
   background: #74c374;
   color: white;
   font-size: 25px;
   cursor: pointer;
-  margin: 5px;
-  border-radius: 3px;
   text-align: center;
   margin-top: auto;
 }
