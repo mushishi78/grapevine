@@ -261,14 +261,14 @@ body {
   display: flex;
   flex-direction: column;
   margin: 0;
-  padding: 5px;
-  padding-top: 0;
+  padding: 0 3px;
 }
 
 .row.clue_and_count {
   flex-shrink: 0;
-  margin-bottom: 10px;
   justify-content: space-between;
+  /* padding: 2px 0; */
+  line-height: 1.1;
 }
 
 .drawing_clue {
@@ -300,6 +300,10 @@ body {
   overflow: scroll;
   flex-grow: 1;
   background: white;
+}
+
+.tools-row {
+  padding: 3px 0;
 }
 
 .content.guess {
@@ -524,7 +528,7 @@ body {
 .ColorPicker {
   position: relative;
   background: #eee;
-  margin: 5px 0;
+  /* margin: 2px 0; */
   border: 1px solid #aaa;
   outline: none;
 }

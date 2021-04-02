@@ -28,6 +28,6 @@ function DrawingRound({ room, user, onNewPath }) {
         div('drawing_count_value', {}, room.ticks))
     ),
     component(Pad, { onNewPath, fabricObjects, brushColor }),
-    div('row', {},
+    div('row tools-row', {},
       component(ColorPicker, { brushColor, setBrushColor })))
 }
