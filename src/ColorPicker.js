@@ -28,9 +28,10 @@ const colors = [
   "white",
   "red",
   "orange",
+  "brown",
   "yellow",
   "green",
   "blue",
-  "indigo",
-  "violet",
+  "purple",
+  "pink",
 ];
