@@ -10,7 +10,6 @@ function Lobby({ room, start }) {
 
   // prettier-ignore
   return div('content lobby', {},
-    div('game_title', {}, 'Grapevine'),
     div('game-explanation', {}, `
       A drawing guessing game where players must try to draw a clue, then
       the next player tries to guess the clue and the next player tries
