@@ -19,6 +19,6 @@ function Lobby({ room, start }) {
     canStart && (
       button('start-button', start, {}, 'Start')),
     !canStart && (
-      div('waiting', {}, 'Need at least ', bold(playerMin), ' players to Start')
+      div('waiting', {}, 'Need at least ', bold(playerMin), ' players to start')
     ))
 }
