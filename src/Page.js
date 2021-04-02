@@ -26,7 +26,7 @@ function Page({ room, user, children }) {
 
   // prettier-ignore
   return div('page', {},
-    div('top-row', {},
+    div('row menu-row', {},
       div(`user-circle ${user.color}`, {},
         div(`user-icon`, {}, user.icon)),
       div('game_title', {}, 'Grapevine'),
