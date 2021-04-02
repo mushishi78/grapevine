@@ -179,13 +179,12 @@ body {
 }
 
 .start-button {
-  padding: 25px;
+  padding: 15px;
   background: #74c374;
   color: white;
-  font-size: 25px;
+  font-size: 35px;
   cursor: pointer;
   margin-top: auto;
-  border-radius: 3px;
   text-align: center;
 }
 
@@ -196,20 +195,18 @@ body {
 }
 
 .countdown_explanation {
-  padding: 15px;
+  margin-top: 100px;
 }
 
 .countdown_count {
   font-size: 50px;
-  padding: 25px;
 }
 
 .countdown_cancel {
-  padding: 25px;
+  padding: 21.5px;
   font-size: 25px;
   cursor: pointer;
   background: #ddd;
-  border-radius: 4px;
   margin-top: auto;
 }
 
