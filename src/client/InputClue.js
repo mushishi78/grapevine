@@ -1,7 +1,7 @@
 const React = require("react");
 const { div, textarea, raw, button } = require("./react");
 
-const checkmarkIcon = require("../eva-icons/fill/svg/checkmark.svg");
+const checkmarkIcon = require("../../eva-icons/fill/svg/checkmark.svg");
 
 module.exports = {
   InputClue,

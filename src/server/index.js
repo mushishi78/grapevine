@@ -2,10 +2,12 @@ const http = require("http");
 const SocketIO = require("socket.io");
 const static = require("node-static");
 const fs = require("fs");
-const Shared = require("./shared");
+const path = require("path");
+const Shared = require("../shared");
 
-const fileServer = new static.Server("./static", { cache: null });
-const indexHTML = fs.readFileSync(__dirname + "/static/index.html", "utf8");
+const root = path.resolve(__dirname + "/../..");
+const fileServer = new static.Server(root + "/static", { cache: null });
+const indexHTML = fs.readFileSync(root + "/static/index.html", "utf8");
 
 const coundownTicks = 5;
 const drawingTicks = 60;

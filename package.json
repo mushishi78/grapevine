@@ -2,9 +2,9 @@
   "name": "grapevine",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "src/server/index.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node src/server/index.js",
     "build": "webpack"
   },
   "keywords": [],

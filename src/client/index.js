@@ -2,7 +2,7 @@ const io = require("socket.io-client");
 const React = require("react");
 const ReactDom = require("react-dom");
 const uuid = require("uuid");
-const { App } = require("./src/App");
+const { App } = require("./App");
 
 window.addEventListener("load", () => {
   const roomCode = getRoomCode();

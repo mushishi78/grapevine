@@ -4,9 +4,9 @@ const { div, button, raw } = require("./react");
 const { timeout } = require("./timeout");
 const { not } = require("./boolean");
 
-const editIcon = require("../eva-icons/fill/svg/edit.svg");
-const copyIcon = require("../eva-icons/fill/svg/copy.svg");
-const menuIcon = require("../eva-icons/fill/svg/menu.svg");
+const editIcon = require("../../eva-icons/fill/svg/edit.svg");
+const copyIcon = require("../../eva-icons/fill/svg/copy.svg");
+const menuIcon = require("../../eva-icons/fill/svg/menu.svg");
 
 module.exports = {
   Page,
