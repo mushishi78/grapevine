@@ -1,10 +1,12 @@
-const { div, button } = require("./react");
+import { CountdownRoom } from "../shared";
+import { div, button } from "./react";
 
-module.exports = {
-  Countdown,
-};
+interface Props {
+  room: CountdownRoom;
+  cancel: () => void;
+}
 
-function Countdown({ room, cancel }) {
+export function Countdown({ room, cancel }: Props) {
   // prettier-ignore
   return div('content countdown', {},
     div('countdown_explanation', {}, 'Game starting in'),

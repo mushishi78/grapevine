@@ -1,8 +1,8 @@
-const io = require("socket.io-client");
-const React = require("react");
-const ReactDom = require("react-dom");
-const uuid = require("uuid");
-const { App } = require("./App");
+import { io } from "socket.io-client";
+import React from "react";
+import ReactDom from "react-dom";
+import * as uuid from "uuid";
+import { App } from "./App";
 
 window.addEventListener("load", () => {
   const roomCode = getRoomCode();
@@ -67,7 +67,7 @@ function getUserColor() {
   );
 }
 
-function readFromSessionWithDefault(key, createDefault) {
+function readFromSessionWithDefault(key: string, createDefault: () => string) {
   let value = sessionStorage.getItem(key);
 
   if (value == null) {
@@ -78,11 +78,13 @@ function readFromSessionWithDefault(key, createDefault) {
   return value;
 }
 
-function getRandomMember(array) {
+function getRandomMember(array: string): string;
+function getRandomMember<T>(array: T[]): T;
+function getRandomMember<T>(array: T[] | string): T | string {
   return array[Math.floor(Math.random() * array.length)];
 }
 
-function buildArray(length, fn) {
+function buildArray<T>(length: number, fn: (index: number) => T) {
   return Array(length)
     .fill(null)
     .map((_, index) => fn(index));

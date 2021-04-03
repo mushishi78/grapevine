@@ -1,11 +1,12 @@
-const React = require("react");
-const { div } = require("./react");
+import React from "react";
+import { div, SetState } from "./react";
 
-module.exports = {
-  ColorPicker,
-};
+interface Props {
+  brushColor: string;
+  setBrushColor: SetState<string>;
+}
 
-function ColorPicker({ brushColor, setBrushColor }) {
+export function ColorPicker({ brushColor, setBrushColor }: Props) {
   const [show, setShow] = React.useState(false);
 
   // prettier-ignore

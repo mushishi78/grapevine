@@ -1,19 +1,21 @@
-const React = require("react");
-const { fabric } = require("fabric");
-const { div, canvas } = require("./react");
-const { getMin, getMax } = require("./number");
+import React from "react";
+import { fabric } from "fabric";
+import { div, canvas } from "./react";
+import { getMin, getMax } from "./number";
 
-module.exports = {
-  Pad,
-};
+interface Props {
+  onNewPath?: (path: fabric.Object, canvas: fabric.Object) => void;
+  fabricObjects?: { objects: fabric.Object[] };
+  brushColor?: string;
+}
 
-function Pad({ onNewPath, fabricObjects, brushColor }) {
-  const padRef = React.useRef();
-  const canvasRef = React.useRef();
+export function Pad({ onNewPath, fabricObjects, brushColor }: Props) {
+  const padRef = React.useRef<HTMLDivElement>();
+  const canvasRef = React.useRef<fabric.Canvas>();
 
   React.useEffect(() => {
     const padElem = padRef.current;
-    const canvasElem = padElem.querySelector(".Pad_canvas");
+    const canvasElem = padElem.querySelector<HTMLCanvasElement>(".Pad_canvas");
     canvasRef.current = new fabric.Canvas(canvasElem, {
       isDrawingMode: onNewPath != null,
       width: padElem.clientWidth,
@@ -23,7 +25,7 @@ function Pad({ onNewPath, fabricObjects, brushColor }) {
     canvasRef.current.freeDrawingBrush.width = 3;
     canvasRef.current.freeDrawingBrush.color = brushColor || "Black";
 
-    canvasRef.current.on("path:created", ({ path }) => {
+    canvasRef.current.on("path:created", ({ path }: any) => {
       onNewPath(path.toObject(), canvasRef.current.toObject());
     });
 
@@ -34,7 +36,7 @@ function Pad({ onNewPath, fabricObjects, brushColor }) {
         o.selectable = false;
         o.hoverCursor = "auto";
       });
-      canvasRef.current.loadFromJSON(fabricObjects);
+      canvasRef.current.loadFromJSON(fabricObjects, () => {});
       fitCanvasToObjects(canvasRef.current);
     }
 
@@ -56,7 +58,7 @@ function Pad({ onNewPath, fabricObjects, brushColor }) {
     });
   }
 
-  function fitCanvasToObjects(canvas) {
+  function fitCanvasToObjects(canvas: fabric.Canvas) {
     const objects = canvas.getObjects();
     const objectsTop = getMin(objects.map((o) => o.top));
     const objectsLeft = getMin(objects.map((o) => o.left));

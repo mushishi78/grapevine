@@ -1,21 +1,26 @@
-const React = require("react");
-const Shared = require("../shared");
-const { Pad } = require("./Pad");
-const { ColorPicker } = require("./ColorPicker");
-const { component, div } = require("./react");
+import React from "react";
+import { getChainIndex, PlayingRoom, User } from "../shared";
+import { Pad } from "./Pad";
+import { ColorPicker } from "./ColorPicker";
+import { component, div } from "./react";
 
-module.exports = {
-  DrawingRound,
-};
+interface Props {
+  room: PlayingRoom;
+  user: User;
+  onNewPath: (path: unknown) => void;
+}
 
-function DrawingRound({ room, user, onNewPath }) {
+export function DrawingRound({ room, user, onNewPath }: Props) {
   const [brushColor, setBrushColor] = React.useState("black");
 
-  const chainIndex = Shared.getChainIndex(room, user.sessionId);
+  const chainIndex = getChainIndex(room, user.sessionId);
   const chain = room.chains[chainIndex];
   const previousAnswer = chain[room.round - 1];
   const currentAnswer = chain[room.round];
-  const fabricObjects = currentAnswer != null ? currentAnswer.value : null;
+  const fabricObjects =
+    currentAnswer != null && typeof currentAnswer.value !== "string"
+      ? currentAnswer.value
+      : null;
 
   // prettier-ignore
   return div('content drawing', {},

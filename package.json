@@ -2,16 +2,23 @@
   "name": "grapevine",
   "version": "1.0.0",
   "description": "",
-  "main": "src/server/index.js",
   "scripts": {
-    "start": "node src/server/index.js",
-    "build": "webpack"
+    "start": "node -r esbuild-register src/server/index.ts",
+    "build": "esbuild src/client/index.ts --bundle --sourcemap --outfile=static/bundle.js",
+    "check": "tsc -w --noEmit"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/fabric": "^4.2.5",
+    "@types/node-static": "^0.7.6",
+    "@types/react": "^17.0.3",
+    "@types/react-dom": "^17.0.3",
+    "@types/uuid": "^8.3.0",
     "copy-to-clipboard": "^3.3.1",
+    "esbuild": "^0.11.4",
+    "esbuild-register": "^2.3.0",
     "fabric": "^4.3.1",
     "node-static": "^0.7.11",
     "prettier": "^2.2.1",
@@ -19,6 +26,7 @@
     "react-dom": "^17.0.1",
     "socket.io": "^3.1.1",
     "socket.io-client": "^3.1.1",
+    "typescript": "^4.2.3",
     "uuid": "^8.3.2",
     "webpack": "^5.23.0",
     "webpack-cli": "^4.5.0"

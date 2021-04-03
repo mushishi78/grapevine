@@ -1,11 +1,13 @@
-const { div, button } = require("./react");
+import { FinishedRoom } from "../shared";
+import { div, button } from "./react";
 
-module.exports = {
-  Finished,
-};
+interface Props {
+  room: FinishedRoom;
+  onReturnToLobby: () => void;
+}
 
-function Finished({ room, onReturnToLobby }) {
-  const scores = {};
+export function Finished({ room, onReturnToLobby }: Props) {
+  const scores: { [sessionId: string]: number } = {};
 
   // Calculate scores
   room.chains.forEach((chain, chainIndex) => {

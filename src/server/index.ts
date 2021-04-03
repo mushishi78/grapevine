@@ -1,12 +1,25 @@
-const http = require("http");
-const SocketIO = require("socket.io");
-const static = require("node-static");
-const fs = require("fs");
-const path = require("path");
-const Shared = require("../shared");
+import http from "http";
+import { Server } from "socket.io";
+import nodeStatic from "node-static";
+import fs from "fs";
+import path from "path";
+import { hasField } from "../shared/object";
+
+import {
+  Room,
+  RoomCode,
+  User,
+  Player,
+  SessionId,
+  getPlayerIndex,
+  getChainIndex,
+  Answer,
+  AnswerValue,
+  ConnectedRoom,
+} from "../shared";
 
 const root = path.resolve(__dirname + "/../..");
-const fileServer = new static.Server(root + "/static", { cache: null });
+const fileServer = new nodeStatic.Server(root + "/static", { cache: null });
 const indexHTML = fs.readFileSync(root + "/static/index.html", "utf8");
 
 const coundownTicks = 5;
@@ -16,8 +29,8 @@ const verbose = true;
 const httpServer = http.createServer((request, response) => {
   request
     .addListener("end", () =>
-      fileServer.serve(request, response, (err) => {
-        if (err && err.status === 404) {
+      fileServer.serve(request, response, (err: Error) => {
+        if (err && hasField(err, "status") && err.status === 404) {
           response.setHeader("Content-Type", "text/html");
           response.setHeader("Content-Length", Buffer.byteLength(indexHTML));
           response.statusCode = 200;
@@ -30,17 +43,17 @@ const httpServer = http.createServer((request, response) => {
   request.on("error", (err) => console.error(err.stack));
 });
 
-const rooms = new Map();
-const intervals = new Map();
+const rooms = new Map<RoomCode, ConnectedRoom>();
+const intervals = new Map<RoomCode, NodeJS.Timeout>();
 
-const io = SocketIO(httpServer);
+const io = new Server(httpServer);
 
 io.on("connection", (socket) => {
   console.log("connected:", socket.id);
 
-  socket.on("join", (roomCode, user) => {
+  socket.on("join", (roomCode: RoomCode, user: User) => {
     user = { ...user, socketId: socket.id };
-    const emptyRoom = { roomCode, status: "lobby", users: [] };
+    const emptyRoom: Room = { roomCode, status: "lobby", users: [] };
 
     // Add user to room map
     let room = rooms.get(roomCode) || emptyRoom;
@@ -85,7 +98,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("start", async (roomCode) => {
+  socket.on("start", async (roomCode: RoomCode) => {
     // Get the room
     let room = rooms.get(roomCode);
     if (room == null) return;
@@ -139,7 +152,7 @@ io.on("connection", (socket) => {
     io.to(roomCode).emit("started", room);
   });
 
-  socket.on("cancel", async (roomCode) => {
+  socket.on("cancel", async (roomCode: RoomCode) => {
     // Get the room
     let room = rooms.get(roomCode);
     if (room == null) return;
@@ -159,97 +172,112 @@ io.on("connection", (socket) => {
     io.to(roomCode).emit("cancelled", room);
   });
 
-  socket.on("submit-answer", async (roomCode, roomRound, answerValue) => {
-    const log = logger("[submit-answer]");
+  socket.on(
+    "submit-answer",
+    async (roomCode: RoomCode, roomRound: number, answerValue: AnswerValue) => {
+      const log = logger("[submit-answer]");
 
-    // Get the room
-    let room = rooms.get(roomCode);
-    if (room == null) return;
+      // Get the room
+      let room = rooms.get(roomCode);
+      if (room == null) return;
 
-    // Find the user
-    const user = room.users.find((u) => u.socketId === socket.id);
-    const answer = { user, value: answerValue };
+      // Find the user
+      const user = room.users.find((u) => u.socketId === socket.id);
+      const answer = { user, value: answerValue };
 
-    // If not a user, ignore
-    if (user == null) {
-      log("user not in room", roomCode, socket.id);
-      return;
-    }
+      // If not a user, ignore
+      if (user == null) {
+        log("user not in room", roomCode, socket.id);
+        return;
+      }
 
-    // If not in playing, ignore
-    if (room.status !== "playing") {
-      log("room no longer in play", room.status);
-      return;
-    }
+      // If not in playing, ignore
+      if (room.status !== "playing") {
+        log("room no longer in play", room.status);
+        return;
+      }
 
-    // If room round has changed, ignore
-    if (room.round !== roomRound) {
-      log("round has finished");
-      return;
-    }
+      // If room round has changed, ignore
+      if (room.round !== roomRound) {
+        log("round has finished");
+        return;
+      }
 
-    // Set the answer in the matrix
-    const chainIndex = Shared.getChainIndex(room, user.sessionId);
-    const chains = set2DMatrixValue(
-      room.chains,
-      chainIndex,
-      room.round,
-      answer
-    );
+      // Set the answer in the matrix
+      const chainIndex = getChainIndex(room, user.sessionId);
+      const chains = set2DMatrixValue(
+        room.chains,
+        chainIndex,
+        room.round,
+        answer
+      );
 
-    // Update the room
-    room = { ...room, chains };
-    rooms.set(roomCode, room);
-    socket.emit("answer-submitted", room, answer);
-    log("emit answer-submitted");
-
-    // If drawing round, will finish with timeout
-    if (room.round % 2 === 1) return;
-
-    // If some of the answers haven't been submitted yet, wait for now
-    if (chains.some((chain) => chain[room.round] == null)) return;
-
-    // Otherwise start next round
-    const round = room.round + 1;
-
-    // If the end of the game
-    if (room.players.length === round) {
-      room = {
-        ...room,
-        status: "marking",
-        markings: initialize3DMatrix(
-          room.players.length,
-          room.players.length,
-          room.players.length
-        ),
-        finished: [],
-      };
-
+      // Update the room
+      room = { ...room, chains };
       rooms.set(roomCode, room);
-      io.to(roomCode).emit("marking-started", room);
-      log("emit marking-started");
-      return;
+      socket.emit("answer-submitted", room, answer);
+      log("emit answer-submitted");
+
+      // If drawing round, will finish with timeout
+      if (roomRound % 2 === 1) return;
+
+      // If some of the answers haven't been submitted yet, wait for now
+      if (chains.some((chain) => chain[roomRound] == null)) return;
+
+      // Otherwise start next round
+      roomRound += 1;
+
+      // If the end of the game
+      if (room.players.length === roomRound) {
+        room = {
+          ...room,
+          round: roomRound,
+          status: "marking",
+          markings: initialize3DMatrix(
+            room.players.length,
+            room.players.length,
+            room.players.length
+          ),
+          finished: [],
+        };
+
+        rooms.set(roomCode, room);
+        io.to(roomCode).emit("marking-started", room);
+        log("emit marking-started");
+        return;
+      }
+
+      // Otherwise start drawing round
+      room = { ...room, round: roomRound, ticks: drawingTicks };
+      rooms.set(roomCode, room);
+      io.to(roomCode).emit("new-drawing-round", room);
+      log("emit new-drawing-round");
+
+      // Start count down
+      const interval = setInterval(tick, 1000, roomCode);
+      intervals.set(roomCode, interval);
     }
-
-    // Otherwise start drawing round
-    room = { ...room, round, ticks: drawingTicks };
-    rooms.set(roomCode, room);
-    io.to(roomCode).emit("new-drawing-round", room);
-    log("emit new-drawing-round");
-
-    // Start count down
-    const interval = setInterval(tick, 1000, roomCode);
-    intervals.set(roomCode, interval);
-  });
+  );
 
   socket.on(
     "submit-marking",
-    async (roomCode, chainIndex, roundIndex, value) => {
+    async (
+      roomCode: RoomCode,
+      chainIndex: number,
+      roundIndex: number,
+      value: number
+    ) => {
       const log = logger("[submit-marking]");
 
       // Get the room
       let room = rooms.get(roomCode);
       if (room == null) return;
+
+      // If not in marking, ignore
+      if (room.status !== "marking") {
+        log("room no longer marking", room.status);
+        return;
+      }
 
       // Find the user
       const user = room.users.find((u) => u.socketId === socket.id);
@@ -261,15 +289,9 @@ io.on("connection", (socket) => {
       }
 
       // Find player
-      const playerIndex = Shared.getPlayerIndex(room, user.sessionId);
+      const playerIndex = getPlayerIndex(room, user.sessionId);
       if (playerIndex == -1) {
         log("user not in game", roomCode, user.sessionId);
-        return;
-      }
-
-      // If not in marking, ignore
-      if (room.status !== "marking") {
-        log("room no longer marking", room.status);
         return;
       }
 
@@ -290,12 +312,18 @@ io.on("connection", (socket) => {
     }
   );
 
-  socket.on("submit-finished", async (roomCode) => {
+  socket.on("submit-finished", async (roomCode: RoomCode) => {
     const log = logger("[submit-finished]");
 
     // Get the room
     let room = rooms.get(roomCode);
     if (room == null) return;
+
+    // If not in marking, ignore
+    if (room.status !== "marking") {
+      log("room no longer marking", room.status);
+      return;
+    }
 
     // Find the user
     const user = room.users.find((u) => u.socketId === socket.id);
@@ -307,15 +335,9 @@ io.on("connection", (socket) => {
     }
 
     // Find player
-    const playerIndex = Shared.getPlayerIndex(room, user.sessionId);
+    const playerIndex = getPlayerIndex(room, user.sessionId);
     if (playerIndex == -1) {
       log("user not in game", roomCode, user.sessionId);
-      return;
-    }
-
-    // If not in marking, ignore
-    if (room.status !== "marking") {
-      log("room no longer marking", room.status);
       return;
     }
 
@@ -343,7 +365,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("return-to-lobby", async (roomCode) => {
+  socket.on("return-to-lobby", async (roomCode: RoomCode) => {
     // Get the room
     let room = rooms.get(roomCode);
     if (room == null) return;
@@ -368,7 +390,7 @@ httpServer.listen(3000, () => {
   console.log("Listening on http://localhost:3000");
 });
 
-function tick(roomCode) {
+function tick(roomCode: RoomCode) {
   const log = logger("[tick]");
   const interval = intervals.get(roomCode);
 
@@ -422,6 +444,7 @@ function tick(roomCode) {
         room.players.length,
         room.players.length
       ),
+      finished: [],
     };
     rooms.set(roomCode, room);
     io.to(roomCode).emit("marking-started", room);
@@ -441,18 +464,18 @@ function tick(roomCode) {
 //
 // Helpers
 
-function logger(prefix) {
-  return (...messages) => {
+function logger(prefix: string) {
+  return (...messages: any[]) => {
     if (!verbose) return;
     console.log(new Date(), prefix, ...messages);
   };
 }
 
-function timeout(ms) {
+function timeout(ms: number) {
   return new Promise((resolve) => setInterval(resolve, ms));
 }
 
-function shuffleArray(array) {
+function shuffleArray<T>(array: T[]): T[] {
   array = cloneArray(array);
 
   for (let i = array.length - 1; i > 0; i--) {
@@ -463,30 +486,36 @@ function shuffleArray(array) {
   return array;
 }
 
-function cloneArray(array) {
+function cloneArray<T>(array: T[]): T[] {
   return array.slice(0);
 }
 
-function initialize2DMatrix(rows, columns) {
+function initialize2DMatrix<T>(rows: number, columns: number) {
   return Array(rows)
     .fill(null)
     .map(() => Array(columns).fill(null));
 }
 
-function initialize3DMatrix(i, j, k) {
+function initialize3DMatrix<T>(i: number, j: number, k: number): T[][][] {
   return Array(i)
     .fill(null)
     .map(() => initialize2DMatrix(j, k));
 }
 
-function set2DMatrixValue(matrix, x, y, value) {
+function set2DMatrixValue<T>(matrix: T[][], x: number, y: number, value: T) {
   matrix = cloneArray(matrix);
   matrix[x] = cloneArray(matrix[x]);
   matrix[x][y] = value;
   return matrix;
 }
 
-function set3DMatrixValue(matrix, x, y, z, value) {
+function set3DMatrixValue<T>(
+  matrix: T[][][],
+  x: number,
+  y: number,
+  z: number,
+  value: T
+) {
   matrix = cloneArray(matrix);
   matrix[x] = cloneArray(matrix[x]);
   matrix[x][y] = cloneArray(matrix[x][y]);

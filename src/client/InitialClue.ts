@@ -1,13 +1,15 @@
-const Shared = require("../shared");
-const { InputClue } = require("./InputClue");
-const { component, div } = require("./react");
+import { AnswerValue, getChainIndex, PlayingRoom, User } from "../shared";
+import { InputClue } from "./InputClue";
+import { component, div } from "./react";
 
-module.exports = {
-  InitialClue,
-};
+interface Props {
+  room: PlayingRoom;
+  user: User;
+  submitAnswer: (answer: AnswerValue) => void;
+}
 
-function InitialClue({ room, user, submitAnswer }) {
-  const chainIndex = Shared.getChainIndex(room, user.sessionId);
+export function InitialClue({ room, user, submitAnswer }: Props) {
+  const chainIndex = getChainIndex(room, user.sessionId);
   const answerSubmitted = room.chains[chainIndex][room.round] != null;
 
   if (answerSubmitted) {

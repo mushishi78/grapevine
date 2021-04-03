@@ -1,7 +1,3 @@
-module.exports = {
-  timeout,
-};
-
-function timeout(ms) {
+export function timeout(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }

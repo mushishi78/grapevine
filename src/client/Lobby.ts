@@ -1,10 +1,12 @@
-const { div, bold, button } = require("./react");
+import { LobbyRoom } from "../shared";
+import { div, bold, button } from "./react";
 
-module.exports = {
-  Lobby,
-};
+interface Props {
+  room: LobbyRoom;
+  start: () => void;
+}
 
-function Lobby({ room, start }) {
+export function Lobby({ room, start }: Props) {
   const playerMin = 3;
   const canStart = room.users.length >= playerMin;
 

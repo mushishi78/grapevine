@@ -1,12 +1,19 @@
-const Shared = require("../shared");
-const { Pad } = require("./Pad");
-const { component, div, button } = require("./react");
+import { getPlayerIndex, MarkingRoom, User } from "../shared";
+import { Pad } from "./Pad";
+import { component, div, button } from "./react";
 
-module.exports = {
-  MarkingRound,
-};
+interface Props {
+  room: MarkingRoom;
+  user: User;
+  submitMarking: (
+    chainIndex: number,
+    roundIndex: number,
+    value: number
+  ) => void;
+  onFinished: () => void;
+}
 
-function MarkingRound({ room, user, submitMarking, onFinished }) {
+export function MarkingRound({ room, user, submitMarking, onFinished }: Props) {
   const finished = room.finished.indexOf(user.sessionId) > -1;
 
   // prettier-ignore
@@ -18,7 +25,7 @@ function MarkingRound({ room, user, submitMarking, onFinished }) {
           chain.map((answer, roundIndex) => {
             if (answer == null) return null;
 
-            const playerIndex = Shared.getPlayerIndex(room, user.sessionId);
+            const playerIndex = getPlayerIndex(room, user.sessionId);
             const marking = room.markings[playerIndex][chainIndex][roundIndex];
             const marked = marking != null ? 'marked' : ''
             const downMarked = marking === -1 ? 'selected' : marking === 1 ? 'not-selected' : ''
@@ -29,7 +36,7 @@ function MarkingRound({ room, user, submitMarking, onFinished }) {
             return div(`marking_answer ${answer.user.color} ${marked}`, { key: roundIndex },
               div(`answer_user-circle ${answer.user.color}`, {},
                 div(`answer_user-icon`, {}, answer.user.icon)),
-              roundIndex % 2 == 0
+              roundIndex % 2 == 0 || (typeof answer.value === 'string')
                 ? div('answer_text', {}, answer.value)
                 : div('answer_drawing', {},
                   component(Pad, { fabricObjects: answer.value })),

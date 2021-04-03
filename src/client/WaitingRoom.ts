@@ -1,10 +1,6 @@
-const { div } = require("./react");
+import { div } from "./react";
 
-module.exports = {
-  WaitingRoom,
-};
-
-function WaitingRoom({}) {
+export function WaitingRoom({}) {
   // prettier-ignore
   return div('content waiting-room', {},
     div('waiting-room_title', {}, 'Game in progress'),

@@ -1,9 +1,4 @@
-module.exports = {
-  getMin,
-  getMax,
-};
-
-function getMin(values) {
+export function getMin(values: number[]) {
   let min = values[0];
 
   for (const value of values) {
@@ -13,7 +8,7 @@ function getMin(values) {
   return min;
 }
 
-function getMax(values) {
+export function getMax(values: number[]) {
   let max = values[0];
 
   for (const value of values) {

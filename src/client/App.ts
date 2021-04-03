@@ -1,21 +1,35 @@
-const React = require("react");
-const { Lobby } = require("./Lobby");
-const { Countdown } = require("./Countdown");
-const { WaitingRoom } = require("./WaitingRoom");
-const { InitialClue } = require("./InitialClue");
-const { DrawingRound } = require("./DrawingRound");
-const { GuessingRound } = require("./GuessingRound");
-const { MarkingRound } = require("./MarkingRound");
-const { Finished } = require("./Finished");
-const { Page } = require("./Page");
-const { component, div } = require("./react");
+import React from "react";
+import { Lobby } from "./Lobby";
+import { Countdown } from "./Countdown";
+import { WaitingRoom } from "./WaitingRoom";
+import { InitialClue } from "./InitialClue";
+import { DrawingRound } from "./DrawingRound";
+import { GuessingRound } from "./GuessingRound";
+import { MarkingRound } from "./MarkingRound";
+import { Finished } from "./Finished";
+import { Page, PageProps } from "./Page";
+import { component, div } from "./react";
+import { Socket } from "socket.io-client";
 
-module.exports = {
-  App,
-};
+import {
+  Answer,
+  AnswerValue,
+  CountdownRoom,
+  Player,
+  PlayingRoom,
+  Room,
+  RoomCode,
+  User,
+} from "../shared";
 
-function App(props) {
-  const [room, setRoom] = React.useState({ status: "connecting" });
+interface Props {
+  socket: Socket;
+  roomCode: RoomCode;
+  user: User;
+}
+
+export function App(props: Props) {
+  const [room, setRoom] = React.useState<Room>({ status: "connecting" });
 
   React.useEffect(() => {
     const { socket } = props;
@@ -30,72 +44,72 @@ function App(props) {
       setRoom({ status: "connecting" });
     });
 
-    socket.on("joined", (player, room) => {
+    socket.on("joined", (player: Player, room: Room) => {
       console.log("New player: ", player);
       setRoom(room);
     });
 
-    socket.on("left", (player, room) => {
+    socket.on("left", (player: Player, room: Room) => {
       console.log("Player left: ", player);
       setRoom(room);
     });
 
-    socket.on("countdown", (room) => {
+    socket.on("countdown", (room: CountdownRoom) => {
       console.log("Countdown :", room.count);
       setRoom(room);
     });
 
-    socket.on("started", (room) => {
+    socket.on("started", (room: Room) => {
       console.log("Game started: ", room);
       setRoom(room);
     });
 
-    socket.on("cancelled", (room) => {
+    socket.on("cancelled", (room: Room) => {
       console.log("Cancelled: ", room);
       setRoom(room);
     });
 
-    socket.on("answer-submitted", (room, answer) => {
+    socket.on("answer-submitted", (room: Room, answer: Answer) => {
       console.log("Answer submitted: ", answer);
       setRoom(room);
     });
 
-    socket.on("new-drawing-round", (room) => {
+    socket.on("new-drawing-round", (room: Room) => {
       console.log("New drawing round");
       setRoom(room);
     });
 
-    socket.on("tick", (room) => {
+    socket.on("tick", (room: PlayingRoom) => {
       console.log("Tick :", room.ticks);
       setRoom(room);
     });
 
-    socket.on("new-guess-round", (room) => {
+    socket.on("new-guess-round", (room: Room) => {
       console.log("New guessing round");
       setRoom(room);
     });
 
-    socket.on("marking-started", (room) => {
+    socket.on("marking-started", (room: Room) => {
       console.log("Marking started");
       setRoom(room);
     });
 
-    socket.on("marking-submitted", (room) => {
+    socket.on("marking-submitted", (room: Room) => {
       console.log("Marking submitted");
       setRoom(room);
     });
 
-    socket.on("finished-submitted", (room) => {
+    socket.on("finished-submitted", (room: Room) => {
       console.log("Finish submitted");
       setRoom(room);
     });
 
-    socket.on("game-finished", (room) => {
+    socket.on("game-finished", (room: Room) => {
       console.log("Game finished");
       setRoom(room);
     });
 
-    socket.on("returned-to-lobby", (room) => {
+    socket.on("returned-to-lobby", (room: Room) => {
       console.log("Returned to Loby");
       setRoom(room);
     });
@@ -109,15 +123,23 @@ function App(props) {
     props.socket.emit("cancel", props.roomCode);
   }
 
-  function submitAnswer(answerValue) {
+  function submitAnswer(answerValue: AnswerValue) {
+    if (room.status !== "playing") return;
     props.socket.emit("submit-answer", props.roomCode, room.round, answerValue);
   }
 
-  function onNewPath(newPath, canvasObject) {
+  function onNewPath(
+    _newPath: fabric.Object,
+    canvasObject: { objects: fabric.Object[] }
+  ) {
     submitAnswer(canvasObject);
   }
 
-  function submitMarking(chainIndex, roundIndex, value) {
+  function submitMarking(
+    chainIndex: number,
+    roundIndex: number,
+    value: number
+  ) {
     props.socket.emit(
       "submit-marking",
       props.roomCode,
@@ -136,6 +158,8 @@ function App(props) {
   }
 
   function content() {
+    if (room.status === "connecting") return null;
+
     if (room.status === "lobby") return component(Lobby, { room, start });
 
     if (room.status === "countdown") {
@@ -143,7 +167,9 @@ function App(props) {
     }
 
     if (
-      room.players.every((player) => player.sessionId !== props.user.sessionId)
+      room.players.every(
+        (player: Player) => player.sessionId !== props.user.sessionId
+      )
     ) {
       return component(WaitingRoom, {});
     }
@@ -184,5 +210,9 @@ function App(props) {
       div('full-page-message', {}, 'Connecting....'));
   }
 
-  return component(Page, { room, user: props.user }, content());
+  return component<Omit<PageProps, "children">>(
+    Page,
+    { room, user: props.user },
+    content()
+  );
 }
