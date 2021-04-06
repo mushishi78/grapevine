@@ -1,6 +1,6 @@
 import React from "react";
 import copyToClipboard from "copy-to-clipboard";
-import { div, button, raw } from "./react";
+import { div, button, raw, a } from "./react";
 import { timeout } from "./timeout";
 import { not } from "./boolean";
 import { ConnectedRoom, User } from "../shared";
@@ -36,8 +36,16 @@ export function Page({ room, user, children }: PageProps) {
       room.users.map(player =>
         div(`player-circle ${player.color}`, { key: player.socketId },
           div('player-icon', {}, player.icon)))),
-
-    children
+    div('page-body', {},
+      div(`main-menu ${showMenu ? 'show' : 'hide'}`, {},
+        button(`menu-item`, copy, {},
+          `Copy invitation`,
+          div(`copied ${copied ? 'show' : 'hide'}`, {}, 'copied!')),
+        a(`menu-item`, '/', {}, `New room`),
+        button(`menu-item disabled`, () => {}, {}, `End game`),
+        button(`menu-item disabled`, () => {}, {}, `New game`),
+      ),
+      children)
   )
 }
 

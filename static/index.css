@@ -136,6 +136,63 @@ button {
   padding: 2px 4px 1px 6px;
 }
 
+.page-body {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-menu {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background: #effbef;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid #2d6f2e;
+  transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.main-menu.hide {transform: translateY(100%);}
+
+.main-menu.show {
+}
+
+.menu-item {
+  padding: 15px;
+  border-bottom: 1px solid #2d6f2e;
+  font-size: 25px;
+  color: hsl(0deg 0% 100%);
+  background: #74c374;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+}
+
+.menu-item:hover {
+ filter: brightness(1.05);
+}
+
+.menu-item.disabled {
+ filter: blur(1px) brightness(0.9);
+ cursor: auto;
+}
+
+.copied {
+  font-size: 10px;
+  padding-top: 5px;
+  line-height: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.copied.hide {
+  opacity: 0;
+}
+
+.copied.show {
+  opacity: 1;
+}
+
 .content {
   flex-grow: 1;
   overflow-y: scroll;
