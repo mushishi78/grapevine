@@ -13,7 +13,9 @@ export interface PageProps {
 
 export function Page({ room, user, children }: PageProps) {
   const [copied, setCopied] = React.useState(false);
-  const [showMenu, setShowMenu] = React.useState(false);
+  const [menuClass, setMenuClass] = React.useState<"hide" | "" | "show">(
+    "hide"
+  );
 
   async function copy() {
     if (copied) return;
@@ -23,13 +25,25 @@ export function Page({ room, user, children }: PageProps) {
     setCopied(false);
   }
 
+  async function toggleMenu() {
+    if (menuClass === "hide") {
+      setMenuClass("");
+      await timeout(10);
+      setMenuClass("show");
+    } else {
+      setMenuClass("");
+      await timeout(500);
+      setMenuClass("hide");
+    }
+  }
+
   // prettier-ignore
   return div('page', {},
     div('row menu-row', {},
       div(`user-circle ${user.color}`, {},
         div(`user-icon`, {}, user.icon)),
       div('game_title', {}, 'Grapevine'),
-      button('menu-button', () => setShowMenu(not), {},
+      button('menu-button', toggleMenu, {},
         raw(menuIcon))
     ),
     div('players-row', {},
@@ -37,7 +51,7 @@ export function Page({ room, user, children }: PageProps) {
         div(`player-circle ${player.color}`, { key: player.socketId },
           div('player-icon', {}, player.icon)))),
     div('page-body', {},
-      div(`main-menu ${showMenu ? 'show' : 'hide'}`, {},
+      div(`main-menu ${menuClass}`, {},
         button(`menu-item`, copy, {},
           `Copy invitation`,
           div(`copied ${copied ? 'show' : 'hide'}`, {}, 'copied!')),

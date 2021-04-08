@@ -151,14 +151,16 @@ button {
   flex-direction: column;
   border-top: 1px solid #2d6f2e;
   transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  z-index: 5;
+  transform: translateY(100%);
 }
 
 .main-menu.hide {
-  transform: translateY(100%);
   display: none;
 }
 
 .main-menu.show {
+  transform: translateY(0%);
 }
 
 .menu-item {
@@ -224,6 +226,12 @@ button {
   text-align: center;
   flex-grow: 1;
   margin: 0 10px;
+}
+
+@media (max-width: 380px) {
+  .game_title {
+    font-size: 25px;
+  }
 }
 
 .game-explanation {
