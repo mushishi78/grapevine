@@ -153,7 +153,10 @@ button {
   transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
 }
 
-.main-menu.hide {transform: translateY(100%);}
+.main-menu.hide {
+  transform: translateY(100%);
+  display: none;
+}
 
 .main-menu.show {
 }
@@ -170,12 +173,12 @@ button {
 }
 
 .menu-item:hover {
- filter: brightness(1.05);
+  filter: brightness(1.05);
 }
 
 .menu-item.disabled {
- filter: blur(1px) brightness(0.9);
- cursor: auto;
+  filter: blur(1px) brightness(0.9);
+  cursor: auto;
 }
 
 .copied {
