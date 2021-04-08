@@ -26,6 +26,7 @@ export function ColorPicker({ brushColor, setBrushColor }: Props) {
 
 const colors = [
   "black",
+  "grey",
   "white",
   "red",
   "orange",

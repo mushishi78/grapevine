@@ -331,6 +331,7 @@ button {
   flex-direction: column;
   margin: 0;
   padding: 0 3px;
+  overflow-y: visible;
 }
 
 .row.clue_and_count {

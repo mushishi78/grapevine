@@ -9,11 +9,8 @@ import {
   Room,
   RoomCode,
   User,
-  Player,
-  SessionId,
   getPlayerIndex,
   getChainIndex,
-  Answer,
   AnswerValue,
   ConnectedRoom,
 } from "../shared";
@@ -22,8 +19,8 @@ const root = path.resolve(__dirname + "/../..");
 const fileServer = new nodeStatic.Server(root + "/static", { cache: null });
 const indexHTML = fs.readFileSync(root + "/static/index.html", "utf8");
 
-const coundownTicks = 5;
-const drawingTicks = 60;
+const coundownTicks = 2;
+const drawingTicks = 6000;
 const verbose = true;
 
 const httpServer = http.createServer((request, response) => {
