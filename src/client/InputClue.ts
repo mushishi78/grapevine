@@ -12,10 +12,6 @@ export function InputClue({ onConfirm }: Props) {
   const disabled = value == null || value === "" || confirming;
   const disabledClass = disabled ? "disabled" : "";
 
-  React.useEffect(() => {
-    document.querySelector<HTMLInputElement>(".InputClue_input").focus();
-  }, []);
-
   function confirm() {
     if (disabled) return;
     setConfirming(true);
