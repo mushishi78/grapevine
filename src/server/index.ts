@@ -37,7 +37,7 @@ const state = new State();
 const io = new Server(httpServer);
 
 io.on("connection", (socket) => {
-  console.log("connected:", socket.id);
+  console.log(new Date(), "[connection]", socket.id);
 
   socket.on("join", (roomCode: RoomCode, user: User) =>
     withLog("[join]", roomCode, (log) => {
