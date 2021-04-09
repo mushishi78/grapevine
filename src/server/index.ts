@@ -72,6 +72,7 @@ io.on("connection", (socket) => {
       state.demandUser(room, socket.id);
 
       state.startCountdown(roomCode, coundownTicks);
+      log("counting down");
 
       for (let i = coundownTicks; i > 0; i--) {
         room = state.countdownTick(roomCode);
@@ -81,6 +82,7 @@ io.on("connection", (socket) => {
 
       room = state.startPlaying(roomCode);
       io.to(roomCode).emit("started", room);
+      log("started");
     })
   );
 
@@ -90,6 +92,7 @@ io.on("connection", (socket) => {
       state.demandUser(room, socket.id);
       state.cancelCountdown(roomCode);
       io.to(roomCode).emit("cancelled", room);
+      log("cancelled countdown");
     })
   );
 
