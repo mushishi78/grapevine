@@ -1,8 +1,8 @@
 import React from "react";
 import copyToClipboard from "copy-to-clipboard";
 import { div, button, raw, a } from "./react";
-import { timeout } from "./timeout";
-import { not } from "./boolean";
+import { timeout } from "../shared/timeout";
+import { not } from "../shared/boolean";
 import { ConnectedRoom, User } from "../shared";
 
 export interface PageProps {

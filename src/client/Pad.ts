@@ -1,7 +1,7 @@
 import React from "react";
 import { fabric } from "fabric";
 import { div, canvas } from "./react";
-import { getMin, getMax } from "./number";
+import { getMin, getMax } from "../shared/number";
 
 interface Props {
   onNewPath?: (path: fabric.Object, canvas: fabric.Object) => void;

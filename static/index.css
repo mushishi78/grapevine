@@ -540,6 +540,7 @@ button {
   font-size: 35px;
   cursor: pointer;
   text-align: center;
+  width: 100%;
 }
 
 .content.finished {
