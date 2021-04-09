@@ -25,10 +25,10 @@ export function logError(log: Log, error: Error | string) {
   console.error(error);
 }
 
-export function withLog(
+export async function withLog(
   prefix: string,
   roomCode: RoomCode,
-  fn: (log: Log) => void
+  fn: (log: Log) => void | Promise<void>
 ) {
   const log: Log = (...messages) => {
     if (!verbose) return;
@@ -36,7 +36,7 @@ export function withLog(
   };
 
   try {
-    fn(log);
+    await fn(log);
   } catch (error) {
     logError(log, error);
   }
