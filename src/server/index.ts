@@ -40,7 +40,7 @@ io.on("connection", (socket) => {
   console.log("connected:", socket.id);
 
   socket.on("join", (roomCode: RoomCode, user: User) =>
-    withLog("[join]", (log) => {
+    withLog("[join]", roomCode, (log) => {
       user = { ...user, socketId: socket.id };
       const room = state.addUser(log, roomCode, user);
       socket.join(roomCode);
@@ -48,22 +48,19 @@ io.on("connection", (socket) => {
     })
   );
 
-  socket.on("disconnecting", () =>
-    withLog("[disconnecting]", (log) => {
-      for (const roomCode of socket.rooms) {
-        try {
-          if (roomCode === socket.id) continue;
-          const { room, user } = state.removeUser(roomCode, socket.id);
-          socket.broadcast.to(roomCode).emit("left", user, room);
-        } catch (error) {
-          logError(log, error);
-        }
-      }
-    })
-  );
+  socket.on("disconnecting", () => {
+    for (const roomCode of socket.rooms) {
+      if (roomCode === socket.id) continue;
+
+      withLog("[disconnecting]", roomCode, (log) => {
+        const { room, user } = state.removeUser(roomCode, socket.id);
+        socket.broadcast.to(roomCode).emit("left", user, room);
+      });
+    }
+  });
 
   socket.on("start", (roomCode: RoomCode) =>
-    withLog("[start]", async (log) => {
+    withLog("[start]", roomCode, async (log) => {
       let room = state.demandRoom(roomCode);
       state.demandUser(room, socket.id);
 
@@ -81,7 +78,7 @@ io.on("connection", (socket) => {
   );
 
   socket.on("cancel", (roomCode: RoomCode) =>
-    withLog("[cancel]", async (log) => {
+    withLog("[cancel]", roomCode, async (log) => {
       let room = state.demandRoom(roomCode);
       state.demandUser(room, socket.id);
       state.cancelCountdown(roomCode);
@@ -92,7 +89,7 @@ io.on("connection", (socket) => {
   socket.on(
     "submit-answer",
     (roomCode: RoomCode, roomRound: number, answerValue: AnswerValue) =>
-      withLog("[submit-answer]", async (log) => {
+      withLog("[submit-answer]", roomCode, async (log) => {
         let room = state.demandRoom(roomCode);
         const user = state.demandUser(room, socket.id);
         const answer = { user, value: answerValue };
@@ -134,7 +131,7 @@ io.on("connection", (socket) => {
       roundIndex: number,
       value: number
     ) => {
-      withLog("[submit-marking]", async (log) => {
+      withLog("[submit-marking]", roomCode, async (log) => {
         let room = state.submitMarking(
           roomCode,
           socket.id,
@@ -150,7 +147,7 @@ io.on("connection", (socket) => {
   );
 
   socket.on("submit-finished", async (roomCode: RoomCode) =>
-    withLog("[submit-finished]", async (log) => {
+    withLog("[submit-finished]", roomCode, async (log) => {
       const markingRoom = state.submitFinished(roomCode, socket.id);
       socket.emit("finished-submitted", markingRoom);
       log("emit finished-submitted");
@@ -165,7 +162,7 @@ io.on("connection", (socket) => {
   );
 
   socket.on("return-to-lobby", async (roomCode: RoomCode) =>
-    withLog("[return-to-lobby]", async (log) => {
+    withLog("[return-to-lobby]", roomCode, async (log) => {
       let room = state.demandRoom(roomCode);
       state.demandUser(room, socket.id);
       room = state.returnToLoby(roomCode);
@@ -180,7 +177,7 @@ httpServer.listen(3000, () => {
 });
 
 function tick(roomCode: RoomCode) {
-  withLog("[tick]", (log) => {
+  withLog("[tick]", roomCode, (log) => {
     try {
       let room: ConnectedRoom = state.demandDrawingRound(roomCode);
 

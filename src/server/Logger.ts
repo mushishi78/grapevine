@@ -1,3 +1,5 @@
+import { RoomCode } from "../shared";
+
 const verbose = true;
 
 export type Log = (...messages: any[]) => void;
@@ -23,10 +25,14 @@ export function logError(log: Log, error: Error | string) {
   console.error(error);
 }
 
-export function withLog(prefix: string, fn: (log: Log) => void) {
+export function withLog(
+  prefix: string,
+  roomCode: RoomCode,
+  fn: (log: Log) => void
+) {
   const log: Log = (...messages) => {
     if (!verbose) return;
-    console.log(new Date(), prefix, ...messages);
+    console.log(new Date(), prefix, roomCode, ...messages);
   };
 
   try {

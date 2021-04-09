@@ -42,14 +42,13 @@ export class State {
 
   public demandRoom(roomCode: RoomCode) {
     const room = this.rooms.get(roomCode);
-    if (room == null) throw new LoggableError("cannot find room", roomCode);
+    if (room == null) throw new LoggableError("cannot find room");
     return room;
   }
 
   public demandUser(room: ConnectedRoom, socketId: string) {
     const user = room.users.find((u) => u.socketId === socketId);
-    if (user == null)
-      throw new LoggableError("user not in room", room.roomCode, socketId);
+    if (user == null) throw new LoggableError("user not in room", socketId);
     return user;
   }
 
@@ -77,7 +76,7 @@ export class State {
     let room = this.demandRoom(roomCode);
 
     if (room.status !== "lobby")
-      throw new LoggableError("room must be in lobby", roomCode);
+      throw new LoggableError("room must be in lobby");
 
     room = { ...room, status: "countdown", count };
     this.rooms.set(roomCode, room);
@@ -87,7 +86,7 @@ export class State {
     let room = this.demandRoom(roomCode);
 
     if (room.status !== "countdown")
-      throw new LoggableError("room is no longer counting down", roomCode);
+      throw new LoggableError("room is no longer counting down");
 
     room = { ...room, status: "lobby" };
     this.rooms.set(roomCode, room);
@@ -99,7 +98,7 @@ export class State {
     let room = this.demandRoom(roomCode);
 
     if (room.status !== "countdown")
-      throw new LoggableError("room is no longer counting down", roomCode);
+      throw new LoggableError("room is no longer counting down");
 
     room = { ...room, count: room.count - 1 };
     this.rooms.set(roomCode, room);
@@ -111,7 +110,7 @@ export class State {
     let room = this.demandRoom(roomCode);
 
     if (room.status !== "countdown")
-      throw new LoggableError("room is no longer counting down", roomCode);
+      throw new LoggableError("room is no longer counting down");
 
     const players = shuffleArray(room.users);
     room = {
@@ -130,7 +129,7 @@ export class State {
     const room = this.demandRoom(roomCode);
 
     if (room.status !== "playing")
-      throw new LoggableError("room is no longer playing", roomCode);
+      throw new LoggableError("room is no longer playing");
 
     return room;
   }
@@ -139,7 +138,7 @@ export class State {
     const room = this.demandRoom(roomCode);
 
     if (room.status !== "marking")
-      throw new LoggableError("room is no longer marking", roomCode);
+      throw new LoggableError("room is no longer marking");
 
     return room;
   }
@@ -148,7 +147,7 @@ export class State {
     let room = this.demandPlayingRoom(roomCode);
 
     if (room.round !== roomRound)
-      throw new LoggableError("round has finished", roomCode, roomRound);
+      throw new LoggableError("round has finished", roomRound);
 
     // Set the answer in the matrix
     const chainIndex = getChainIndex(room, answer.user.sessionId);
@@ -212,7 +211,7 @@ export class State {
     const room = this.demandPlayingRoom(roomCode);
 
     if (room.round % 2 === 0)
-      throw new LoggableError("room not in drawing round", roomCode);
+      throw new LoggableError("room not in drawing round");
 
     return room;
   }
@@ -236,7 +235,7 @@ export class State {
   public demandPlayerIndex(room: PlayingRoom | MarkingRoom, sessionId: string) {
     const playerIndex = getPlayerIndex(room, sessionId);
     if (playerIndex == -1)
-      throw new LoggableError("user not in game", room.roomCode, sessionId);
+      throw new LoggableError("user not in game", sessionId);
 
     return playerIndex;
   }
@@ -272,7 +271,7 @@ export class State {
     this.demandPlayerIndex(room, user.sessionId);
 
     if (room.finished.indexOf(user.sessionId) > -1)
-      throw new LoggableError("already finished", roomCode, user.sessionId);
+      throw new LoggableError("already finished", user.sessionId);
 
     const finished = room.finished.concat(user.sessionId);
     room = { ...room, finished };
