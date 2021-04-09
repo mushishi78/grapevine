@@ -11,7 +11,7 @@ export function Finished({ room, onReturnToLobby }: Props) {
 
   // Calculate scores
   room.chains.forEach((chain, chainIndex) => {
-    chain.forEach((answer, roundIndex) => {
+    chain.filter(Boolean).forEach((answer, roundIndex) => {
       const { sessionId } = answer.user;
       let score = scores[sessionId] || 0;
 

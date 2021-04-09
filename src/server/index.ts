@@ -45,7 +45,7 @@ io.on("connection", (socket) => {
       const room = state.addUser(log, roomCode, user);
       socket.join(roomCode);
       io.to(roomCode).emit("joined", user, room);
-      log("joined", socket.id);
+      log("emit joined", socket.id);
     })
   );
 
@@ -61,7 +61,7 @@ io.on("connection", (socket) => {
 
         room = state.removeUser(roomCode, socket.id);
         socket.broadcast.to(roomCode).emit("left", user, room);
-        log("disconnecting", socket.id);
+        log("emit left", socket.id);
       });
     }
   });
@@ -82,7 +82,7 @@ io.on("connection", (socket) => {
 
       room = state.startPlaying(roomCode);
       io.to(roomCode).emit("started", room);
-      log("started");
+      log("emit started");
     })
   );
 
@@ -92,7 +92,27 @@ io.on("connection", (socket) => {
       state.demandUser(room, socket.id);
       state.cancelCountdown(roomCode);
       io.to(roomCode).emit("cancelled", room);
-      log("cancelled countdown");
+      log("emit cancelled");
+    })
+  );
+
+  socket.on("end-game", (roomCode: RoomCode) =>
+    withLog("[end-game]", roomCode, async (log) => {
+      let room = state.demandRoom(roomCode);
+      state.demandUser(room, socket.id);
+      room = state.startMarkingRound(roomCode);
+      io.to(roomCode).emit("marking-started", room);
+      log("emit marking-started");
+    })
+  );
+
+  socket.on("new-game", (roomCode: RoomCode) =>
+    withLog("[new-game]", roomCode, async (log) => {
+      let room = state.demandRoom(roomCode);
+      state.demandUser(room, socket.id);
+      room = state.returnToLoby(roomCode);
+      io.to(roomCode).emit("returned-to-lobby", room);
+      log("emit returned-to-lobby");
     })
   );
 

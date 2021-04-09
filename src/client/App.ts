@@ -115,6 +115,14 @@ export function App(props: Props) {
     });
   }, []);
 
+  function onEndGame() {
+    props.socket.emit("end-game", props.roomCode);
+  }
+
+  function onNewGame() {
+    props.socket.emit("new-game", props.roomCode);
+  }
+
   function start() {
     props.socket.emit("start", props.roomCode);
   }
@@ -212,7 +220,7 @@ export function App(props: Props) {
 
   return component<Omit<PageProps, "children">>(
     Page,
-    { room, user: props.user },
+    { room, user: props.user, onEndGame, onNewGame },
     content()
   );
 }

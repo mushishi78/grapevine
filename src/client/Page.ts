@@ -9,9 +9,17 @@ export interface PageProps {
   room: ConnectedRoom;
   user: User;
   children: React.ReactNode[];
+  onEndGame: () => void;
+  onNewGame: () => void;
 }
 
-export function Page({ room, user, children }: PageProps) {
+export function Page({
+  room,
+  user,
+  children,
+  onEndGame,
+  onNewGame,
+}: PageProps) {
   const [copied, setCopied] = React.useState(false);
   const [menuClass, setMenuClass] = React.useState<"hide" | "" | "show">(
     "hide"
@@ -37,6 +45,16 @@ export function Page({ room, user, children }: PageProps) {
     }
   }
 
+  const hasStarted = room.status !== "lobby" && room.status !== "countdown";
+
+  function onMenuButton(disabled: boolean, action: () => void) {
+    if (disabled) return null;
+    return () => {
+      action();
+      toggleMenu();
+    };
+  }
+
   // prettier-ignore
   return div('page', {},
     div('row menu-row', {},
@@ -56,8 +74,8 @@ export function Page({ room, user, children }: PageProps) {
           `Copy invitation`,
           div(`copied ${copied ? 'show' : 'hide'}`, {}, 'copied!')),
         a(`menu-item`, '/', {}, `New room`),
-        button(`menu-item disabled`, () => {}, {}, `End game`),
-        button(`menu-item disabled`, () => {}, {}, `New game`),
+        button(`menu-item ${hasStarted ? '' : 'disabled'}`, onMenuButton(!hasStarted, onEndGame), {}, `End game`),
+        button(`menu-item ${hasStarted ? '' : 'disabled'}`, onMenuButton(!hasStarted, onNewGame), {}, `New game`),
       ),
       children)
   )
