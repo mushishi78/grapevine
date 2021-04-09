@@ -5,7 +5,7 @@ import fs from "fs";
 import path from "path";
 import { hasField } from "../shared/object";
 import { State } from "./State";
-import { logError, withLog } from "./logger";
+import { withLog } from "./logger";
 import { timeout } from "../shared/timeout";
 import { RoomCode, User, AnswerValue, ConnectedRoom } from "../shared";
 
@@ -45,6 +45,7 @@ io.on("connection", (socket) => {
       const room = state.addUser(log, roomCode, user);
       socket.join(roomCode);
       io.to(roomCode).emit("joined", user, room);
+      log("joined", socket.id);
     })
   );
 
@@ -53,8 +54,14 @@ io.on("connection", (socket) => {
       if (roomCode === socket.id) continue;
 
       withLog("[disconnecting]", roomCode, (log) => {
-        const { room, user } = state.removeUser(roomCode, socket.id);
+        let room = state.demandRoom(roomCode);
+
+        const user = room.users.find((u) => u.socketId === socket.id);
+        if (user == null) return;
+
+        room = state.removeUser(roomCode, socket.id);
         socket.broadcast.to(roomCode).emit("left", user, room);
+        log("disconnecting", socket.id);
       });
     }
   });

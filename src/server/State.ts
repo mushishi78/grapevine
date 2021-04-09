@@ -54,7 +54,6 @@ export class State {
 
   public removeUser(roomCode: RoomCode, socketId: string) {
     let room = this.demandRoom(roomCode);
-    const user = this.demandUser(room, socketId);
 
     // If now empty, remove room
     if (room.users.length <= 1) {
@@ -69,7 +68,7 @@ export class State {
     // Update the room
     this.rooms.set(roomCode, room);
 
-    return { room, user };
+    return room;
   }
 
   public startCountdown(roomCode: RoomCode, count: number) {
