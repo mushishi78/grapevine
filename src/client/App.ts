@@ -15,7 +15,6 @@ import {
   Answer,
   AnswerValue,
   CountdownRoom,
-  Player,
   PlayingRoom,
   Room,
   RoomCode,
@@ -44,13 +43,13 @@ export function App(props: Props) {
       setRoom({ status: "connecting" });
     });
 
-    socket.on("joined", (player: Player, room: Room) => {
-      console.log("New player: ", player);
+    socket.on("joined", (user: User, room: Room) => {
+      console.log("New player: ", user);
       setRoom(room);
     });
 
-    socket.on("left", (player: Player, room: Room) => {
-      console.log("Player left: ", player);
+    socket.on("left", (user: User, room: Room) => {
+      console.log("Player left: ", user);
       setRoom(room);
     });
 
@@ -174,11 +173,7 @@ export function App(props: Props) {
       return component(Countdown, { room, cancel });
     }
 
-    if (
-      room.players.every(
-        (player: Player) => player.sessionId !== props.user.sessionId
-      )
-    ) {
+    if (!room.players.includes(props.user.sessionId)) {
       return component(WaitingRoom, {});
     }
 

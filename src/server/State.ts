@@ -4,7 +4,6 @@ import {
   ConnectedRoom,
   FinishedRoom,
   getChainIndex,
-  getPlayerIndex,
   MarkingRoom,
   PlayingRoom,
   Room,
@@ -111,7 +110,7 @@ export class State {
     if (room.status !== "countdown")
       throw new LoggableError("room is no longer counting down");
 
-    const players = shuffleArray(room.users);
+    const players = shuffleArray(room.users).map((u) => u.sessionId);
     room = {
       ...room,
       status: "playing",
@@ -232,7 +231,7 @@ export class State {
   }
 
   public demandPlayerIndex(room: PlayingRoom | MarkingRoom, sessionId: string) {
-    const playerIndex = getPlayerIndex(room, sessionId);
+    const playerIndex = room.players.indexOf(sessionId);
     if (playerIndex == -1)
       throw new LoggableError("user not in game", sessionId);
 

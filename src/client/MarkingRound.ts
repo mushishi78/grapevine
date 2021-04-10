@@ -1,4 +1,4 @@
-import { getPlayerIndex, MarkingRoom, User } from "../shared";
+import { MarkingRoom, User } from "../shared";
 import { Pad } from "./Pad";
 import { component, div, button } from "./react";
 
@@ -25,7 +25,7 @@ export function MarkingRound({ room, user, submitMarking, onFinished }: Props) {
           chain.map((answer, roundIndex) => {
             if (answer == null) return null;
 
-            const playerIndex = getPlayerIndex(room, user.sessionId);
+            const playerIndex = room.players.indexOf(user.sessionId);
             const marking = room.markings[playerIndex][chainIndex][roundIndex];
             const marked = marking != null ? 'marked' : ''
             const downMarked = marking === -1 ? 'selected' : marking === 1 ? 'not-selected' : ''

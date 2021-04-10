@@ -23,15 +23,15 @@ export function Finished({ room, onReturnToLobby }: Props) {
     });
   });
 
-  // Sort players
-  const players = room.players.slice(0);
-  players.sort((a, b) => scores[b.sessionId] - scores[a.sessionId]);
+  // Sort users
+  const users = room.users.filter((u) => room.players.includes(u.sessionId));
+  users.sort((a, b) => scores[b.sessionId] - scores[a.sessionId]);
 
   // prettier-ignore
   return div('content finished', {},
     div('finished_title', {}, 'Finished!'),
     div('podium', {},
-      players.map(player =>
+      users.map(player =>
         div('finished_player', { key: player.sessionId },
           div(`finished_user-circle ${player.color}`, {},
             div(`finished_user-icon`, {}, player.icon)),

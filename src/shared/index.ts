@@ -20,7 +20,7 @@ export type CountdownRoom = Omit<LobbyRoom, "status"> & {
 
 export type PlayingRoom = Omit<CountdownRoom, "status"> & {
   status: "playing";
-  players: Player[];
+  players: SessionId[];
   chains: Answer[][];
   round: number;
   ticks?: number;
@@ -43,8 +43,6 @@ export interface User {
   icon: string;
 }
 
-export interface Player extends User {}
-
 export type SocketId = string;
 export type SessionId = string;
 export type RoomCode = string;
@@ -55,19 +53,10 @@ export type AnswerValue = GuessAnswerValue | DrawingAnswerValue;
 export type GuessAnswerValue = string;
 export type DrawingAnswerValue = { objects: fabric.Object[] };
 
-export function getPlayerIndex(
-  room: PlayingRoom | MarkingRoom,
-  sessionId: SessionId
-) {
-  const player = room.players.find((p) => p.sessionId === sessionId);
-  const playerIndex = room.players.indexOf(player);
-  return playerIndex;
-}
-
 export function getChainIndex(
   room: PlayingRoom | MarkingRoom,
   sessionId: SessionId
 ) {
-  const playerIndex = getPlayerIndex(room, sessionId);
+  const playerIndex = room.players.indexOf(sessionId);
   return (playerIndex + room.round) % room.players.length;
 }
