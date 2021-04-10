@@ -1,10 +1,4 @@
-import {
-  AnswerValue,
-  DrawingAnswerValue,
-  getChainIndex,
-  PlayingRoom,
-  User,
-} from "../shared";
+import { AnswerValue, getChainIndex, PlayingRoom, User } from "../shared";
 import { Pad } from "./Pad";
 import { InputClue } from "./InputClue";
 import { component, div } from "./react";

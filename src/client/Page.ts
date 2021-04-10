@@ -2,7 +2,6 @@ import React from "react";
 import copyToClipboard from "copy-to-clipboard";
 import { div, button, raw, a } from "./react";
 import { timeout } from "../shared/timeout";
-import { not } from "../shared/boolean";
 import { ConnectedRoom, User } from "../shared";
 
 export interface PageProps {
@@ -55,6 +54,11 @@ export function Page({
     };
   }
 
+  const connectedSessionIds = room.connections.map((c) => c.sessionId);
+  const connectedUsers = room.users.filter((user) =>
+    connectedSessionIds.includes(user.sessionId)
+  );
+
   // prettier-ignore
   return div('page', {},
     div('row menu-row', {},
@@ -65,8 +69,8 @@ export function Page({
         raw(menuIcon))
     ),
     div('players-row', {},
-      room.users.map(player =>
-        div(`player-circle ${player.color}`, { key: player.socketId },
+      connectedUsers.map(player =>
+        div(`player-circle ${player.color}`, { key: player.sessionId },
           div('player-icon', {}, player.icon)))),
     div('page-body', {},
       div(`main-menu ${menuClass}`, {},

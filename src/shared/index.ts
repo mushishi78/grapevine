@@ -11,6 +11,7 @@ export type LobbyRoom = {
   roomCode: RoomCode;
   users: User[];
   status: "lobby";
+  connections: Connection[];
 };
 
 export type CountdownRoom = Omit<LobbyRoom, "status"> & {
@@ -37,10 +38,14 @@ export type FinishedRoom = Omit<MarkingRoom, "status"> & {
 };
 
 export interface User {
-  socketId: SocketId;
   sessionId: SessionId;
   color: string;
   icon: string;
+}
+
+export interface Connection {
+  socketId: SocketId;
+  sessionId: SessionId;
 }
 
 export type SocketId = string;

@@ -41,8 +41,21 @@ io.on("connection", (socket) => {
 
   socket.on("join", (roomCode: RoomCode, user: User) =>
     withLog("[join]", roomCode, (log) => {
-      user = { ...user, socketId: socket.id };
-      const room = state.addUser(log, roomCode, user);
+      let room = state.rooms.get(roomCode);
+
+      if (room == null) {
+        log("creating new room");
+        room = state.createNewRoom(roomCode);
+      }
+
+      log("adding connection", socket.id);
+      room = state.addConnection(roomCode, socket.id, user.sessionId);
+
+      if (state.findUser(room, socket.id) == null) {
+        log("adding user", user.sessionId);
+        room = state.addUser(roomCode, user);
+      }
+
       socket.join(roomCode);
       io.to(roomCode).emit("joined", user, room);
       log("emit joined", socket.id);
@@ -50,16 +63,16 @@ io.on("connection", (socket) => {
   );
 
   socket.on("disconnecting", () => {
-    for (const roomCode of socket.rooms) {
+    for (const roomCode of socket.rooms as RoomCode[]) {
       if (roomCode === socket.id) continue;
 
       withLog("[disconnecting]", roomCode, (log) => {
         let room = state.demandRoom(roomCode);
 
-        const user = room.users.find((u) => u.socketId === socket.id);
+        const user = state.findUser(room, socket.id);
         if (user == null) return;
 
-        room = state.removeUser(roomCode, socket.id);
+        room = state.removeConnection(roomCode, socket.id);
         socket.broadcast.to(roomCode).emit("left", user, room);
         log("emit left", socket.id);
       });

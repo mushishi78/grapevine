@@ -4,6 +4,7 @@ import {
   ConnectedRoom,
   FinishedRoom,
   getChainIndex,
+  LobbyRoom,
   MarkingRoom,
   PlayingRoom,
   Room,
@@ -24,18 +25,34 @@ export class State {
   public rooms = new Map<RoomCode, ConnectedRoom>();
   public intervals = new Map<RoomCode, NodeJS.Timeout>();
 
-  public addUser(log: Log, roomCode: RoomCode, user: User) {
+  public createNewRoom(roomCode: RoomCode) {
+    const room: Room = {
+      roomCode,
+      status: "lobby",
+      users: [],
+      connections: [],
+    };
+    this.rooms.set(roomCode, room);
+    return room;
+  }
+
+  public addConnection(
+    roomCode: RoomCode,
+    socketId: string,
+    sessionId: string
+  ) {
     let room: Room = this.rooms.get(roomCode);
+    const connections = room.connections.concat({ socketId, sessionId });
+    room = { ...room, connections };
+    this.rooms.set(roomCode, room);
+    return room;
+  }
 
-    if (room == null) {
-      log("creating new room", roomCode);
-      room = { roomCode, status: "lobby", users: [] };
-    }
-
+  public addUser(roomCode: RoomCode, user: User) {
+    let room: Room = this.rooms.get(roomCode);
     const users = room.users.concat(user);
     room = { ...room, users };
     this.rooms.set(roomCode, room);
-
     return room;
   }
 
@@ -45,24 +62,29 @@ export class State {
     return room;
   }
 
+  public findUser(room: ConnectedRoom, socketId: string) {
+    const connection = room.connections.find((c) => c.socketId === socketId);
+    return room.users.find((u) => u.sessionId === connection.sessionId);
+  }
+
   public demandUser(room: ConnectedRoom, socketId: string) {
-    const user = room.users.find((u) => u.socketId === socketId);
+    const user = this.findUser(room, socketId);
     if (user == null) throw new LoggableError("user not in room", socketId);
     return user;
   }
 
-  public removeUser(roomCode: RoomCode, socketId: string) {
+  public removeConnection(roomCode: RoomCode, socketId: string) {
     let room = this.demandRoom(roomCode);
 
     // If now empty, remove room
-    if (room.users.length <= 1) {
+    if (room.connections.length <= 1) {
       this.rooms.delete(roomCode);
       return;
     }
 
-    // Remove user from room
-    const users = room.users.filter((u) => u.socketId !== socketId);
-    room = { ...room, users };
+    // Remove connection from room
+    const connections = room.connections.filter((u) => u.socketId !== socketId);
+    room = { ...room, connections };
 
     // Update the room
     this.rooms.set(roomCode, room);
@@ -287,7 +309,12 @@ export class State {
 
   public returnToLoby(roomCode: RoomCode) {
     let room = this.demandRoom(roomCode);
-    room = { roomCode, status: "lobby", users: room.users };
+    room = {
+      roomCode,
+      status: "lobby",
+      users: room.users,
+      connections: room.connections,
+    };
     this.rooms.set(roomCode, room);
     return room;
   }
