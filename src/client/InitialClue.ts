@@ -1,16 +1,30 @@
-import { AnswerValue, getChainIndex, PlayingRoom, User } from "../shared";
 import { InputClue } from "./InputClue";
+import { MissingPlayers } from "./MissingPlayers";
 import { component, div } from "./react";
+
+import {
+  AnswerValue,
+  getChainIndex,
+  getMissingSessionIds,
+  PlayingRoom,
+  User,
+} from "../shared";
 
 interface Props {
   room: PlayingRoom;
   user: User;
   submitAnswer: (answer: AnswerValue) => void;
+  onNewGame: () => void;
 }
 
-export function InitialClue({ room, user, submitAnswer }: Props) {
+export function InitialClue({ room, user, submitAnswer, onNewGame }: Props) {
   const chainIndex = getChainIndex(room, user.sessionId);
   const answerSubmitted = room.chains[chainIndex][room.round] != null;
+
+  const missingSessionIds = getMissingSessionIds(room);
+  if (missingSessionIds.length > 0) {
+    return component(MissingPlayers, { room, missingSessionIds, onNewGame });
+  }
 
   if (answerSubmitted) {
     // prettier-ignore

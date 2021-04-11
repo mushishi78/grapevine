@@ -65,3 +65,14 @@ export function getChainIndex(
   const playerIndex = room.players.indexOf(sessionId);
   return (playerIndex + room.round) % room.players.length;
 }
+
+export function getMissingSessionIds(room: Room) {
+  if (room.status === "lobby") return [];
+  if (room.status === "connecting") return [];
+  if (room.status === "countdown") return [];
+  const connectedSessionIds = room.connections.map((c) => c.sessionId);
+
+  return room.players.filter(
+    (sessionId) => !connectedSessionIds.includes(sessionId)
+  );
+}

@@ -44,8 +44,6 @@ export function Page({
     }
   }
 
-  const hasStarted = room.status !== "lobby" && room.status !== "countdown";
-
   function onMenuButton(disabled: boolean, action: () => void) {
     if (disabled) return null;
     return () => {
@@ -53,6 +51,8 @@ export function Page({
       toggleMenu();
     };
   }
+
+  const hasStarted = room.status !== "lobby" && room.status !== "countdown";
 
   const connectedSessionIds = room.connections.map((c) => c.sessionId);
   const connectedUsers = room.users.filter((user) =>

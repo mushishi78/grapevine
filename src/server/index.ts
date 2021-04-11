@@ -7,7 +7,13 @@ import { hasField } from "../shared/object";
 import { State } from "./State";
 import { withLog } from "./logger";
 import { timeout } from "../shared/timeout";
-import { RoomCode, User, AnswerValue, ConnectedRoom } from "../shared";
+import {
+  RoomCode,
+  User,
+  AnswerValue,
+  ConnectedRoom,
+  getMissingSessionIds,
+} from "../shared";
 
 const root = path.resolve(__dirname + "/../..");
 const fileServer = new nodeStatic.Server(root + "/static", { cache: null });
@@ -223,6 +229,13 @@ function tick(roomCode: RoomCode) {
   withLog("[tick]", roomCode, (log) => {
     try {
       let room: ConnectedRoom = state.demandDrawingRound(roomCode);
+
+      // If missing players, do not tick
+      const missingSessionIds = getMissingSessionIds(room);
+      if (missingSessionIds.length > 0) {
+        log("no tick whilst missing players", roomCode, missingSessionIds);
+        return;
+      }
 
       // If still going, tick
       if (room.ticks > 1) {

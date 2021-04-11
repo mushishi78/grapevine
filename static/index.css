@@ -635,3 +635,27 @@ button {
   border-radius: 3px;
   border: 1px solid #333;
 }
+
+.MissingPlayers {
+  padding: 10px;
+}
+
+.MissingPlayers_title {
+  padding-bottom: 15px;
+  font-size: 35px;
+}
+
+.MissingPlayers_explanation {
+  font-size: 14px;
+  max-width: 50ch;
+}
+
+.MissingPlayers_users {
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  padding: 5px;
+  flex-shrink: 0;
+}
+
+.MissingPlayers_new-game {padding: 15px;background: #74c374;margin: 15px 0;color: white;cursor: pointer;}

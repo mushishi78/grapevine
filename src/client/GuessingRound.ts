@@ -1,15 +1,23 @@
-import { AnswerValue, getChainIndex, PlayingRoom, User } from "../shared";
+import {
+  AnswerValue,
+  getChainIndex,
+  getMissingSessionIds,
+  PlayingRoom,
+  User,
+} from "../shared";
 import { Pad } from "./Pad";
 import { InputClue } from "./InputClue";
 import { component, div } from "./react";
+import { MissingPlayers } from "./MissingPlayers";
 
 interface Props {
   room: PlayingRoom;
   user: User;
   submitAnswer: (answerValue: AnswerValue) => void;
+  onNewGame: () => void;
 }
 
-export function GuessingRound({ room, user, submitAnswer }: Props) {
+export function GuessingRound({ room, user, submitAnswer, onNewGame }: Props) {
   const chainIndex = getChainIndex(room, user.sessionId);
   const chain = room.chains[chainIndex];
   const previousAnswer = chain[room.round - 1];
@@ -18,6 +26,11 @@ export function GuessingRound({ room, user, submitAnswer }: Props) {
     previousAnswer != null && typeof previousAnswer.value !== "string"
       ? previousAnswer.value
       : null;
+
+  const missingSessionIds = getMissingSessionIds(room);
+  if (missingSessionIds.length > 0) {
+    return component(MissingPlayers, { room, missingSessionIds, onNewGame });
+  }
 
   if (answerSubmitted) {
     // prettier-ignore

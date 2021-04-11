@@ -178,7 +178,12 @@ export function App(props: Props) {
     }
 
     if (room.status === "playing" && room.round === 0) {
-      return component(InitialClue, { room, user: props.user, submitAnswer });
+      return component(InitialClue, {
+        room,
+        user: props.user,
+        submitAnswer,
+        onNewGame,
+      });
     }
 
     if (room.status === "playing" && room.round % 2 === 1) {
@@ -186,11 +191,17 @@ export function App(props: Props) {
         room,
         user: props.user,
         onNewPath,
+        onNewGame,
       });
     }
 
     if (room.status === "playing" && room.round % 2 === 0) {
-      return component(GuessingRound, { room, user: props.user, submitAnswer });
+      return component(GuessingRound, {
+        room,
+        user: props.user,
+        submitAnswer,
+        onNewGame,
+      });
     }
 
     if (room.status === "marking") {

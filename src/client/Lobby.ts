@@ -8,7 +8,7 @@ interface Props {
 
 export function Lobby({ room, start }: Props) {
   const playerMin = 3;
-  const canStart = room.users.length >= playerMin;
+  const canStart = room.connections.length >= playerMin;
 
   // prettier-ignore
   return div('content lobby', {},

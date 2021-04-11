@@ -132,7 +132,7 @@ export class State {
     if (room.status !== "countdown")
       throw new LoggableError("room is no longer counting down");
 
-    const players = shuffleArray(room.users).map((u) => u.sessionId);
+    const players = shuffleArray(room.connections).map((u) => u.sessionId);
     room = {
       ...room,
       status: "playing",

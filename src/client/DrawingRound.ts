@@ -1,16 +1,23 @@
 import React from "react";
-import { getChainIndex, PlayingRoom, User } from "../shared";
+import {
+  getChainIndex,
+  getMissingSessionIds,
+  PlayingRoom,
+  User,
+} from "../shared";
 import { Pad } from "./Pad";
 import { ColorPicker } from "./ColorPicker";
 import { component, div } from "./react";
+import { MissingPlayers } from "./MissingPlayers";
 
 interface Props {
   room: PlayingRoom;
   user: User;
   onNewPath: (path: unknown) => void;
+  onNewGame: () => void;
 }
 
-export function DrawingRound({ room, user, onNewPath }: Props) {
+export function DrawingRound({ room, user, onNewPath, onNewGame }: Props) {
   const [brushColor, setBrushColor] = React.useState("black");
 
   const chainIndex = getChainIndex(room, user.sessionId);
@@ -21,6 +28,11 @@ export function DrawingRound({ room, user, onNewPath }: Props) {
     currentAnswer != null && typeof currentAnswer.value !== "string"
       ? currentAnswer.value
       : null;
+
+  const missingSessionIds = getMissingSessionIds(room);
+  if (missingSessionIds.length > 0) {
+    return component(MissingPlayers, { room, missingSessionIds, onNewGame });
+  }
 
   // prettier-ignore
   return div('content drawing', {},
