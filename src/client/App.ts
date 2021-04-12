@@ -18,6 +18,7 @@ import {
   PlayingRoom,
   Room,
   RoomCode,
+  SessionId,
   User,
 } from "../shared";
 
@@ -112,6 +113,11 @@ export function App(props: Props) {
       console.log("Returned to Loby");
       setRoom(room);
     });
+
+    socket.on("place-taken", (room: Room) => {
+      console.log("Place taken");
+      setRoom(room);
+    });
   }, []);
 
   function onEndGame() {
@@ -164,6 +170,10 @@ export function App(props: Props) {
     props.socket.emit("return-to-lobby", props.roomCode);
   }
 
+  function takePlace(sessionId: SessionId) {
+    props.socket.emit("take-place", props.roomCode, sessionId);
+  }
+
   function content() {
     if (room.status === "connecting") return null;
 
@@ -174,7 +184,7 @@ export function App(props: Props) {
     }
 
     if (!room.players.includes(props.user.sessionId)) {
-      return component(WaitingRoom, {});
+      return component(WaitingRoom, { room, takePlace });
     }
 
     if (room.status === "playing" && room.round === 0) {

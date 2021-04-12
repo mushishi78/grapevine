@@ -13,6 +13,7 @@ import {
   AnswerValue,
   ConnectedRoom,
   getMissingSessionIds,
+  SessionId,
 } from "../shared";
 
 const root = path.resolve(__dirname + "/../..");
@@ -217,6 +218,16 @@ io.on("connection", (socket) => {
       room = state.returnToLoby(roomCode);
       io.to(roomCode).emit("returned-to-lobby", room);
       log("emit returned-to-lobby");
+    })
+  );
+
+  socket.on("take-place", async (roomCode: RoomCode, sessionId: SessionId) =>
+    withLog("[take-place]", roomCode, async (log) => {
+      let room = state.demandRoom(roomCode);
+      const user = state.demandUser(room, socket.id);
+      room = state.takePlace(roomCode, user.sessionId, sessionId);
+      io.to(roomCode).emit("place-taken", room);
+      log("emit place-taken");
     })
   );
 });

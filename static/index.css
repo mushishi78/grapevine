@@ -597,14 +597,41 @@ button {
 }
 
 .waiting-room_title {
-  font-size: 20px;
-  padding: 5px 10px 0;
+  font-size: 25px;
+  padding: 15px 10px 10px;
 }
 
 .waiting-room_explanation {
   padding: 10px;
   font-size: 14px;
   max-width: 50ch;
+}
+
+.waiting-room_missing-users {
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+/*   align-items: center; */
+}
+
+.waiting-room_missing-user {
+  display: flex;
+  align-items: center;
+}
+
+.waiting-room_select-user {
+  font-size: 20px;
+  padding: 10px 20px;
+  background: hsl(120deg 40% 61%);
+  margin: 5px 15px;
+  color: white;
+  border-radius: 4px;
+  border: 1px solid #5db15d;
+  cursor: pointer;
+}
+
+.waiting-room_select-user:hover {
+  filter: brightness(1.1);
 }
 
 .ColorPicker {
@@ -658,4 +685,10 @@ button {
   flex-shrink: 0;
 }
 
-.MissingPlayers_new-game {padding: 15px;background: #74c374;margin: 15px 0;color: white;cursor: pointer;}
+.MissingPlayers_new-game {
+  padding: 15px;
+  background: #74c374;
+  margin: 15px 0;
+  color: white;
+  cursor: pointer;
+}

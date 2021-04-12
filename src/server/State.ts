@@ -9,6 +9,7 @@ import {
   PlayingRoom,
   Room,
   RoomCode,
+  SessionId,
   User,
 } from "../shared";
 import {
@@ -315,6 +316,20 @@ export class State {
       users: room.users,
       connections: room.connections,
     };
+    this.rooms.set(roomCode, room);
+    return room;
+  }
+
+  public takePlace(
+    roomCode: RoomCode,
+    newSessionId: SessionId,
+    oldSessionId: SessionId
+  ) {
+    let room = this.demandPlayingRoom(roomCode);
+    const players = room.players.map((player) =>
+      player === oldSessionId ? newSessionId : player
+    );
+    room = { ...room, players };
     this.rooms.set(roomCode, room);
     return room;
   }
