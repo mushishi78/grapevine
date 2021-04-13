@@ -1,10 +1,9 @@
-import { Log, LoggableError } from "./logger";
+import { LoggableError } from "./Logger";
 import {
   Answer,
   ConnectedRoom,
   FinishedRoom,
   getChainIndex,
-  LobbyRoom,
   MarkingRoom,
   PlayingRoom,
   Room,
