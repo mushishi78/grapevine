@@ -53,7 +53,7 @@ export function Pad({ setFabricObject, fabricObjects, brushColor }: Props) {
   }, [brushColor]);
 
   React.useEffect(() => {
-    canvasRef.current.loadFromJSON(fabricObjects, () => {}).renderAll();
+    canvasRef.current.loadFromJSON(fabricObjects, () => {});
   }, [JSON.stringify(fabricObjects)]);
 
   function onResize() {
