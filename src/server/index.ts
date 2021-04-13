@@ -5,7 +5,7 @@ import fs from "fs";
 import path from "path";
 import { hasField } from "../shared/object";
 import { State } from "./State";
-import { withLog } from "./logger";
+import { withLog } from "./Logger";
 import { timeout } from "../shared/timeout";
 import {
   RoomCode,
