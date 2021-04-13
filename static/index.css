@@ -384,6 +384,17 @@ button {
   padding: 3px 0;
 }
 
+.undo {
+  cursor: pointer;
+  background: #eee;
+  border: 1px solid #aaa;
+  margin: 0 2px;
+}
+
+.undo svg {
+  width: 43px;
+}
+
 .content.guess {
   display: flex;
   flex-direction: column;
@@ -611,7 +622,7 @@ button {
   margin: 10px;
   display: flex;
   flex-direction: column;
-/*   align-items: center; */
+  /*   align-items: center; */
 }
 
 .waiting-room_missing-user {

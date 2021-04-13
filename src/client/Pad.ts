@@ -3,13 +3,16 @@ import { fabric } from "fabric";
 import { div, canvas } from "./react";
 import { getMin, getMax } from "../shared/number";
 
+type FabricObjects = { objects: fabric.Object[] };
+export type SetFabricObjects = (fabricObjects: FabricObjects) => void;
+
 interface Props {
-  onNewPath?: (path: fabric.Object, canvas: fabric.Object) => void;
+  setFabricObject?: SetFabricObjects;
   fabricObjects?: { objects: fabric.Object[] };
   brushColor?: string;
 }
 
-export function Pad({ onNewPath, fabricObjects, brushColor }: Props) {
+export function Pad({ setFabricObject, fabricObjects, brushColor }: Props) {
   const padRef = React.useRef<HTMLDivElement>();
   const canvasRef = React.useRef<fabric.Canvas>();
 
@@ -17,7 +20,7 @@ export function Pad({ onNewPath, fabricObjects, brushColor }: Props) {
     const padElem = padRef.current;
     const canvasElem = padElem.querySelector<HTMLCanvasElement>(".Pad_canvas");
     canvasRef.current = new fabric.Canvas(canvasElem, {
-      isDrawingMode: onNewPath != null,
+      isDrawingMode: setFabricObject != null,
       width: padElem.clientWidth,
       height: padElem.clientHeight,
     });
@@ -25,8 +28,8 @@ export function Pad({ onNewPath, fabricObjects, brushColor }: Props) {
     canvasRef.current.freeDrawingBrush.width = 3;
     canvasRef.current.freeDrawingBrush.color = brushColor || "Black";
 
-    canvasRef.current.on("path:created", ({ path }: any) => {
-      onNewPath(path.toObject(), canvasRef.current.toObject());
+    canvasRef.current.on("path:created", () => {
+      setFabricObject(canvasRef.current.toObject());
     });
 
     window.addEventListener("resize", onResize);
@@ -48,6 +51,10 @@ export function Pad({ onNewPath, fabricObjects, brushColor }: Props) {
   React.useEffect(() => {
     canvasRef.current.freeDrawingBrush.color = brushColor;
   }, [brushColor]);
+
+  React.useEffect(() => {
+    canvasRef.current.loadFromJSON(fabricObjects, () => {}).renderAll();
+  }, [JSON.stringify(fabricObjects)]);
 
   function onResize() {
     const padElem = document.querySelector(".Pad");
