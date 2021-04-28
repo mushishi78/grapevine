@@ -3,7 +3,7 @@ import { fabric } from "fabric";
 import { div, canvas } from "./react";
 import { getMin, getMax } from "../shared/number";
 
-type FabricObjects = { objects: fabric.Object[] };
+export type FabricObjects = { objects: fabric.Object[] };
 export type SetFabricObjects = (fabricObjects: FabricObjects) => void;
 
 interface Props {

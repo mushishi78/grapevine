@@ -141,7 +141,7 @@ export function App(props: Props) {
     props.socket.emit("submit-answer", props.roomCode, room.round, answerValue);
   }
 
-  function setFabricObject(canvasObject: { objects: fabric.Object[] }) {
+  function saveFabricObjects(canvasObject: { objects: fabric.Object[] }) {
     submitAnswer(canvasObject);
   }
 
@@ -197,7 +197,7 @@ export function App(props: Props) {
       return component(DrawingRound, {
         room,
         user: props.user,
-        setFabricObject,
+        saveFabricObjects,
         onNewGame,
       });
     }

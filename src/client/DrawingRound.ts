@@ -1,26 +1,27 @@
 import React from "react";
+import { Pad, SetFabricObjects, FabricObjects } from "./Pad";
+import { ColorPicker } from "./ColorPicker";
+import { button, component, div, raw } from "./react";
+import { MissingPlayers } from "./MissingPlayers";
+
 import {
   getChainIndex,
   getMissingSessionIds,
   PlayingRoom,
   User,
 } from "../shared";
-import { Pad, SetFabricObjects } from "./Pad";
-import { ColorPicker } from "./ColorPicker";
-import { button, component, div, raw } from "./react";
-import { MissingPlayers } from "./MissingPlayers";
 
 interface Props {
   room: PlayingRoom;
   user: User;
-  setFabricObject: SetFabricObjects;
+  saveFabricObjects: SetFabricObjects;
   onNewGame: () => void;
 }
 
 export function DrawingRound({
   room,
   user,
-  setFabricObject,
+  saveFabricObjects,
   onNewGame,
 }: Props) {
   const [brushColor, setBrushColor] = React.useState("black");
@@ -29,15 +30,24 @@ export function DrawingRound({
   const chain = room.chains[chainIndex];
   const previousAnswer = chain[room.round - 1];
   const currentAnswer = chain[room.round];
-  const fabricObjects =
+  const initialFabricObjects =
     currentAnswer != null && typeof currentAnswer.value !== "string"
       ? currentAnswer.value
       : null;
 
+  const [fabricObjects, setFabricObjects] = React.useState(
+    initialFabricObjects
+  );
+
+  function setAndSaveFabricObjects(fabricObjects: FabricObjects) {
+    setFabricObjects(fabricObjects);
+    saveFabricObjects(fabricObjects);
+  }
+
   function undo() {
-    setFabricObject({
-      objects: fabricObjects.objects.slice(0, fabricObjects.objects.length - 1),
-    });
+    const newLength = fabricObjects.objects.length - 1;
+    const objects = fabricObjects.objects.slice(0, newLength);
+    setAndSaveFabricObjects({ objects });
   }
 
   const missingSessionIds = getMissingSessionIds(room);
@@ -55,7 +65,7 @@ export function DrawingRound({
         div('drawing_count_label', {}, "Count"),
         div('drawing_count_value', {}, room.ticks))
     ),
-    component(Pad, { setFabricObject, fabricObjects, brushColor }),
+    component(Pad, { setFabricObject: setAndSaveFabricObjects, fabricObjects, brushColor }),
     div('row tools-row', {},
       component(ColorPicker, { brushColor, setBrushColor }),
       button('undo', undo, {}, raw(undoIcon))))
