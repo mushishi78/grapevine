@@ -11,6 +11,7 @@ button {
   border: none;
   border-radius: 0;
   box-sizing: content-box;
+  font-family: "Roboto Mono", monospace;
 }
 
 .full-page {
