@@ -110,7 +110,7 @@ io.on("connection", (socket) => {
     withLog("[cancel]", roomCode, async (log) => {
       let room = state.demandRoom(roomCode);
       state.demandUser(room, socket.id);
-      state.cancelCountdown(roomCode);
+      room = state.cancelCountdown(roomCode);
       io.to(roomCode).emit("cancelled", room);
       log("emit cancelled");
     })
