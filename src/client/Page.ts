@@ -53,6 +53,7 @@ export function Page({
   }
 
   const hasStarted = room.status !== "lobby" && room.status !== "countdown";
+  const isPlaying = room.status === "playing";
 
   const connectedSessionIds = room.connections.map((c) => c.sessionId);
   const connectedUsers = room.users.filter((user) =>
@@ -78,7 +79,7 @@ export function Page({
           `Copy invitation`,
           div(`copied ${copied ? 'show' : 'hide'}`, {}, 'copied!')),
         a(`menu-item`, '/', {}, `New room`),
-        button(`menu-item ${hasStarted ? '' : 'disabled'}`, onMenuButton(!hasStarted, onEndGame), {}, `End game`),
+        button(`menu-item ${isPlaying ? '' : 'disabled'}`, onMenuButton(!isPlaying, onEndGame), {}, `End game`),
         button(`menu-item ${hasStarted ? '' : 'disabled'}`, onMenuButton(!hasStarted, onNewGame), {}, `New game`),
       ),
       children)
